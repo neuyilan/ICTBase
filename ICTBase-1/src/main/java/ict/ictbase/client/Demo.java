@@ -40,7 +40,7 @@ public class Demo {
     public static void initCoProcessors(Configuration conf, String coprocessorJarLoc, HTableGetByIndex htable) throws Exception {
        int coprocessorIndex = 1;
        HIndexConstantsAndUtils.updateCoprocessor(conf, htable.getTableName(), coprocessorIndex++, true, coprocessorJarLoc, "ict.ictbase.coprocessor.IndexObserverwReadRepair");
-       HIndexConstantsAndUtils.updateCoprocessor(conf, htable.getTableName(), coprocessorIndex++, true, coprocessorJarLoc, "ict.ictbase.coprocessor.PhysicalDeletionInCompaction");
+//       HIndexConstantsAndUtils.updateCoprocessor(conf, htable.getTableName(), coprocessorIndex++, true, coprocessorJarLoc, "ict.ictbase.coprocessor.PhysicalDeletionInCompaction");
        htable.configPolicy(HTableGetByIndex.PLY_READCHECK);
     }
 
