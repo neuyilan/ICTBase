@@ -128,7 +128,7 @@ public class IssueCompaction {
 
         try{
             if (loadCoprocessor){
-                HIndexConstantsAndUtils.updateCoprocessor(conf, dataTableName, 1, true, coprocessorJarLoc, "tthbase.coprocessor.PhysicalDeletionInCompaction");
+                HIndexConstantsAndUtils.updateCoprocessor(conf, dataTableName, 1, true, coprocessorJarLoc, "ict.ictbase.coprocessor.PhysicalDeletionInCompaction");
             } else {
                 HIndexConstantsAndUtils.updateCoprocessor(conf, dataTableName, 1, false, null, null);
             }

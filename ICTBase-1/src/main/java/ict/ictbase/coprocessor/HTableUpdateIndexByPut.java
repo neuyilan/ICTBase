@@ -15,7 +15,7 @@ import ict.ictbase.util.HIndexConstantsAndUtils;
 import ict.ictbase.commons.HTableWithIndexesDriver;
 
 public class HTableUpdateIndexByPut extends HTableWithIndexesDriver {
-    public HTableUpdateIndexByPut(Configuration conf, byte[] tableName) throws IOException {
+	public HTableUpdateIndexByPut(Configuration conf, byte[] tableName) throws IOException {
         super(conf, tableName);
     }
 

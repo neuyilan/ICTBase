@@ -22,6 +22,7 @@ public class HTableWithIndexesDriver extends HTable {
         HTableDescriptor dataTableDesc = null; 
         try {
             dataTableDesc = getTableDescriptor();
+            System.out.println("***************"+dataTableDesc.toString());
             //enable autoflush
             setAutoFlush(true);
         } catch (IOException e1) {
@@ -38,6 +39,7 @@ public class HTableWithIndexesDriver extends HTable {
         //scan through all indexed columns
         for (int indexNumber = 1; ; indexNumber++){
             String indexedColumn = dataTableDesc.getValue(HIndexConstantsAndUtils.INDEX_INDICATOR + indexNumber);
+            System.out.println("*********************indexedColumn:"+indexedColumn);
             if(indexedColumn == null){
                 //no (further) index column, at current index
                 break;
@@ -46,6 +48,7 @@ public class HTableWithIndexesDriver extends HTable {
                 String indexedColumnFamilyName = names[0];
                 String indexedColumnName = names[1]; 
                 String indexTableName = dataTableDesc.getNameAsString() + "_" + indexedColumnFamilyName + "_" + indexedColumnName;
+                System.out.println("*********************indexTableName:"+indexTableName);
                 try {
 					HTable indexTable = new HTable(conf, indexTableName);
                     indexTable.setAutoFlush(true);
@@ -78,8 +81,8 @@ public class HTableWithIndexesDriver extends HTable {
     }
 
     /**
-@para, valueStop is exclusive!
-@return, <dataValue in range, list of dataKeys>
+	@para, valueStop is exclusive!
+	@return, <dataValue in range, list of dataKeys>
     */
     protected Map<byte[], List<byte[]> > internalGetByIndexByRange(byte[] columnFamily, byte[] columnName, byte[] valueStart, byte[] valueStop) throws IOException {
         HTable indexTable = getIndexTable(columnFamily, columnName);

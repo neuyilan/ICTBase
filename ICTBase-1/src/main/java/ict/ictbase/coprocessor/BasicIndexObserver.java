@@ -29,6 +29,7 @@ public class BasicIndexObserver extends LoggedObserver {
             synchronized(this) {
                 if(initialized == false) {
                     Configuration conf = HBaseConfiguration.create();
+                    System.out.println("*********************desc.getTableName():"+desc.getTableName());
                     dataTableWithIndexes = new HTableUpdateIndexByPut(conf, desc.getTableName().getName()); //this will make copy of data table instance.
                     initialized = true;
                 }
