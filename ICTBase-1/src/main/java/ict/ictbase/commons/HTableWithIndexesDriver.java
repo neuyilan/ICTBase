@@ -95,6 +95,8 @@ public class HTableWithIndexesDriver extends HTable {
     }
 
     public void deleteFromIndex(byte[] columnFamily, byte[] columnName, byte[] dataValue, byte[] dataKey) throws IOException {
+    	System.out.println(Bytes.toString(columnFamily)+"\t"+Bytes.toString(columnName)+"\t"+
+    			Bytes.toString(dataValue)+"\t"+Bytes.toString(dataKey));
         HTable indexTable = getIndexTable(columnFamily, columnName);
         policyToMaterializeIndex.deleteFromIndex(indexTable, dataValue, dataKey);
     }

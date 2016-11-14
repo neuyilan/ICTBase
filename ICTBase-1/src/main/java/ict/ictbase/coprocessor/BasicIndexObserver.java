@@ -1,5 +1,7 @@
 package ict.ictbase.coprocessor;
 
+import ict.ictbase.util.QueueUtil;
+
 import java.io.IOException;
 import java.util.List;
 
@@ -23,7 +25,7 @@ public class BasicIndexObserver extends LoggedObserver {
     private boolean initialized;
 
     protected HTableUpdateIndexByPut dataTableWithIndexes = null;
-
+    protected QueueUtil queueUtil =null;
     private void tryInitialize(HTableDescriptor desc) throws IOException {
         if(initialized == false) {
             synchronized(this) {
@@ -31,6 +33,7 @@ public class BasicIndexObserver extends LoggedObserver {
                     Configuration conf = HBaseConfiguration.create();
                     System.out.println("*********************desc.getTableName():"+desc.getTableName());
                     dataTableWithIndexes = new HTableUpdateIndexByPut(conf, desc.getTableName().getName()); //this will make copy of data table instance.
+                    queueUtil = new QueueUtil();
                     initialized = true;
                 }
             }
