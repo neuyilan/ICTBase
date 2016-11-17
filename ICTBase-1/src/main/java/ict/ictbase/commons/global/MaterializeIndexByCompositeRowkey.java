@@ -1,4 +1,6 @@
-package ict.ictbase.commons;
+package ict.ictbase.commons.global;
+import ict.ictbase.commons.MaterializeIndex;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -76,6 +78,17 @@ public class MaterializeIndexByCompositeRowkey implements MaterializeIndex {
         //del.setTimestamp(timestamp);
         indexTable.delete(del);
     }
+
+	@Override
+	/**
+	 * for local index
+	 */
+	public void putToIndex(HTable dataTable, String regionStartKey,
+			byte[] columnFamily, byte[] columnName, byte[] dataValue,
+			byte[] dataKey) throws IOException {
+		
+	}
+
 }
 
 class IndexStorageFormat {

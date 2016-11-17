@@ -1,6 +1,6 @@
 package ict.ictbase.util;
 
-import ict.ictbase.coprocessor.HTableUpdateIndexByPut;
+import ict.ictbase.commons.global.HTableUpdateIndexByPut;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -16,7 +16,7 @@ import org.apache.hadoop.hbase.client.Put;
 
 public class QueueUtil {
 
-	private Map<HTableUpdateIndexByPut, LinkedBlockingQueue<Put>> tablePutsQueueMap = null; //new HashMap<HTableUpdateIndexByPut, LinkedBlockingQueue<Put>>();
+	private static Map<HTableUpdateIndexByPut, LinkedBlockingQueue<Put>> tablePutsQueueMap = null; //new HashMap<HTableUpdateIndexByPut, LinkedBlockingQueue<Put>>();
 	private ExecutorService executor = null;
 	private HTableUpdateIndexByPut dataTableWithIndexes = null;
 	private LinkedBlockingQueue<Put> putsQueue = null;
@@ -31,10 +31,12 @@ public class QueueUtil {
 
 	public QueueUtil(){
 		if (executor == null) {
+			System.out.println("******************  coming the QueueUtil init method executor == null");
 			executor = Executors.newCachedThreadPool();
 		}
-		
+		System.out.println("******************  coming the QueueUtil init method");
 		if(tablePutsQueueMap ==null){
+			System.out.println("******************  coming the QueueUtil init method tablePutsQueueMap == null");
 			tablePutsQueueMap = new HashMap<HTableUpdateIndexByPut, LinkedBlockingQueue<Put>>();
 		}
 		Callable<Void> c = new Task();
@@ -101,9 +103,6 @@ public class QueueUtil {
 	
 	class Task implements Callable<Void>{
 		public Void call() throws Exception {
-			
-			Thread.sleep(1000*60*2);
-			
 			for (Iterator<Map.Entry<HTableUpdateIndexByPut, LinkedBlockingQueue<Put>>> it = tablePutsQueueMap
 					.entrySet().iterator(); it.hasNext();) {
 				Map.Entry<HTableUpdateIndexByPut, LinkedBlockingQueue<Put>> entry = it

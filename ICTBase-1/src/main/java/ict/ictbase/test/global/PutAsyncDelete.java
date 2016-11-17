@@ -1,10 +1,12 @@
-package ict.ictbase.test;
+package ict.ictbase.test.global;
 
-import ict.ictbase.client.HTableGetByIndex;
+import ict.ictbase.commons.global.HTableGetByIndex;
 import ict.ictbase.util.HIndexConstantsAndUtils;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
@@ -15,8 +17,8 @@ import org.apache.hadoop.hbase.client.ConnectionFactory;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.util.Bytes;
 
-public class PutSyncDelete {
-	private static String testTableName = "test_sync_delete";
+public class PutAsyncDelete {
+	private static String testTableName = "test_async_delete";
 	private static String columnFamily = "cf";
 	private static String indexedColumnName = "country";
 	private static Configuration conf;
@@ -32,9 +34,9 @@ public class PutSyncDelete {
 		if (admin.isTableAvailable(tn)) {
 			HIndexConstantsAndUtils.deleteTable(conf,
 					Bytes.toBytes(testTableName));
-			System.out.println("*******************");
 		}
 
+		
 		HIndexConstantsAndUtils.createAndConfigBaseTable(conf,
 				Bytes.toBytes(testTableName), Bytes.toBytes(columnFamily),
 				new String[] { indexedColumnName });
@@ -46,7 +48,6 @@ public class PutSyncDelete {
 		TableName indexTN = TableName.valueOf(indexTableName);
 
 		if (admin.isTableAvailable(indexTN)) {
-			System.out.println("**********5555555*********");
 			HIndexConstantsAndUtils.deleteTable(conf, indexTableName);
 		}
 
@@ -59,23 +60,23 @@ public class PutSyncDelete {
 		int coprocessorIndex = 1;
 		HIndexConstantsAndUtils.updateCoprocessor(conf, htable.getTableName(),
 				coprocessorIndex++, true, coprocessorJarLoc,
-				"ict.ictbase.coprocessor.IndexObserverBaseline");
+				"ict.ictbase.coprocessor.global.IndexObserverAsyncMaintain");
 
-//		HIndexConstantsAndUtils.updateCoprocessor(conf, htable.getTableName(),
-//				coprocessorIndex++, true, coprocessorJarLoc,
-//				"ict.ictbase.coprocessor.PhysicalDeletionInCompaction");
 //		htable.configPolicy(HTableGetByIndex.PLY_READCHECK);
 	}
 
 	public static void loadData() throws IOException {
 		// load data
-		String rowkeyStr = "key_sync";
+		String rowkeyStr = "key_async";
 		byte[] rowKey = Bytes.toBytes(rowkeyStr);
-		for (int i = 0; i < 5; i++) {
+		for (int i = 10; i < 20; i++) {
 			Put p = new Put(rowKey);
+			long ts = 100+i;
 			p.addColumn(Bytes.toBytes(columnFamily),
-					Bytes.toBytes(indexedColumnName), 100 + i,
+					Bytes.toBytes(indexedColumnName), ts,
 					Bytes.toBytes("v" + i));
+			p.setAttribute("put_time_version", Bytes.toBytes(ts));
+			
 			htable.put(p);
 		}
 
@@ -91,7 +92,6 @@ public class PutSyncDelete {
 		}
 		initTables(conf, testTableName, columnFamily, indexedColumnName);
 		htable = new HTableGetByIndex(conf, Bytes.toBytes(testTableName));
-
 		initCoProcessors(conf, coprocessorJarLoc, htable);
 
 		loadData();
@@ -99,7 +99,7 @@ public class PutSyncDelete {
 		// getByIndex
 		htable.configPolicy(HTableGetByIndex.PLY_FASTREAD);
 		List<byte[]> res = htable.getByIndex(Bytes.toBytes(columnFamily),
-				Bytes.toBytes(indexedColumnName), Bytes.toBytes("v4"));
+				Bytes.toBytes(indexedColumnName), Bytes.toBytes("v19"));
 		assert (res != null && res.size() != 0);
 		System.out.println("Result is " + Bytes.toString(res.get(0)));
 	}

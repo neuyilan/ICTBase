@@ -6,11 +6,11 @@ import java.util.Map;
 import org.apache.hadoop.hbase.client.HTable;
 
 
-interface MaterializeIndex {
+public interface MaterializeIndex {
     public Map<byte[], List<byte[]> > getByIndexByRange(HTable indexTable, byte[] valueStart, byte[] valueStop) throws IOException;
 
     public void putToIndex(HTable indexTable, byte[] dataValue, byte[] dataKey) throws IOException;
 
     public void deleteFromIndex(HTable indexTable, byte[] dataValue, byte[] dataKey) throws IOException;
-
+	public void putToIndex(HTable dataTable,String regionStartKey,byte [] columnFamily ,byte [] columnName,byte []  dataValue,byte []  dataKey)throws IOException;
 }

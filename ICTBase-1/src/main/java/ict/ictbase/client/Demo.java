@@ -1,5 +1,6 @@
 package ict.ictbase.client;
 
+import ict.ictbase.commons.global.HTableGetByIndex;
 import ict.ictbase.util.HIndexConstantsAndUtils;
 
 import java.util.List;

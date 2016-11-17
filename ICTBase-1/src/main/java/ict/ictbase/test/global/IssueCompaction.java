@@ -1,6 +1,5 @@
-package ict.ictbase.test;
+package ict.ictbase.test.global;
 
-import ict.ictbase.client.HTableGetByIndex;
 /*
  disable 'testtable2'
  drop 'testtable2'
@@ -23,6 +22,7 @@ import ict.ictbase.client.HTableGetByIndex;
  describe 'testtable2'
  */
 
+import ict.ictbase.commons.global.HTableGetByIndex;
 import ict.ictbase.util.HIndexConstantsAndUtils;
 
 import java.io.IOException;

@@ -1,6 +1,7 @@
-package ict.ictbase.coprocessor;
+package ict.ictbase.coprocessor.global;
 
-import ict.ictbase.commons.HTableWithIndexesDriver;
+import ict.ictbase.commons.global.HTableWithIndexesDriver;
+import ict.ictbase.coprocessor.LoggedObserver;
 
 import java.io.IOException;
 import java.util.HashSet;

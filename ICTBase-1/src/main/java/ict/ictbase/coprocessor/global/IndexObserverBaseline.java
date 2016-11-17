@@ -1,9 +1,10 @@
-package ict.ictbase.coprocessor;
+package ict.ictbase.coprocessor.global;
 import org.apache.hadoop.hbase.coprocessor.ObserverContext;
 import org.apache.hadoop.hbase.coprocessor.RegionCoprocessorEnvironment;
 import org.apache.hadoop.hbase.regionserver.wal.WALEdit;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Durability;
+
 import java.io.IOException;
 
 public class IndexObserverBaseline extends BasicIndexObserver {

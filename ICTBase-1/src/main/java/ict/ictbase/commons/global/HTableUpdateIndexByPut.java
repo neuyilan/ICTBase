@@ -1,4 +1,4 @@
-package ict.ictbase.coprocessor;
+package ict.ictbase.commons.global;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Get;
@@ -12,7 +12,6 @@ import java.io.IOException;
 import java.util.List;
 
 import ict.ictbase.util.HIndexConstantsAndUtils;
-import ict.ictbase.commons.HTableWithIndexesDriver;
 
 public class HTableUpdateIndexByPut extends HTableWithIndexesDriver {
 	public HTableUpdateIndexByPut(Configuration conf, byte[] tableName) throws IOException {

@@ -118,6 +118,38 @@ public class HIndexConstantsAndUtils {
 		desc.addFamily(descColFamily);
 		admin.createTable(desc);
 	}
+	
+	public static void createAndConfigAndSplitBaseTable(Configuration conf,
+			byte[] tableName, byte[] columnFamily, byte[] indexTableColumnFamily,String[] indexedColumnNames, String startKeyStr,String endKeyStr,int numberOfRegions)
+			throws IOException {
+		Connection con = ConnectionFactory.createConnection(conf);
+		Admin admin = con.getAdmin();
+		TableName tn = TableName.valueOf(tableName);
+		HTableDescriptor desc = new HTableDescriptor(tn);
+		// specify indexable columns.
+		for (int i = 0; i < indexedColumnNames.length; i++) {
+			desc.setValue(INDEX_INDICATOR + (i + 1),
+					Bytes.toString(columnFamily) + INDEX_DELIMITOR
+							+ indexedColumnNames[i]);
+		}
+		HColumnDescriptor descColFamily = new HColumnDescriptor(columnFamily);
+		descColFamily.setKeepDeletedCells(KeepDeletedCells.TRUE);
+		descColFamily.setTimeToLive(HConstants.FOREVER);
+		descColFamily.setMaxVersions(Integer.MAX_VALUE);
+		desc.addFamily(descColFamily);
+		
+		HColumnDescriptor indexColFamily = new HColumnDescriptor(indexTableColumnFamily);
+		indexColFamily.setKeepDeletedCells(KeepDeletedCells.TRUE);
+		indexColFamily.setTimeToLive(HConstants.FOREVER);
+		indexColFamily.setMaxVersions(Integer.MAX_VALUE);
+		desc.addFamily(indexColFamily);
+		
+		byte [] startKey = Bytes.toBytes(startKeyStr);
+		byte [] endKey = Bytes.toBytes(endKeyStr);
+		admin.createTable(desc,startKey,endKey,numberOfRegions);
+	}
+	
+	
 
 	public static void createAndConfigIndexTable(Configuration conf,
 			byte[] tableName, byte[] columnFamily) throws IOException {

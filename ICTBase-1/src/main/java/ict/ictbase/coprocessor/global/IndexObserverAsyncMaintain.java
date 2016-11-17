@@ -1,4 +1,4 @@
-package ict.ictbase.coprocessor;
+package ict.ictbase.coprocessor.global;
 
 import java.io.IOException;
 
