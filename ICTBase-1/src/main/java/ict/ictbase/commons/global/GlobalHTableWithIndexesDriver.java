@@ -1,5 +1,4 @@
 package ict.ictbase.commons.global;
-import ict.ictbase.commons.MaterializeIndex;
 import ict.ictbase.util.HIndexConstantsAndUtils;
 
 import java.io.IOException;
@@ -12,13 +11,13 @@ import org.apache.hadoop.hbase.HTableDescriptor;
 import org.apache.hadoop.hbase.client.HTable;
 import org.apache.hadoop.hbase.util.Bytes;
 
-public class HTableWithIndexesDriver extends HTable {
+public class GlobalHTableWithIndexesDriver extends HTable {
     protected static int errorIndex = 0;
     protected Map<String, HTable> indexTables = null;
-    protected MaterializeIndex policyToMaterializeIndex = null;
+    protected GlobalMaterializeIndex policyToMaterializeIndex = null;
 
     @SuppressWarnings("deprecation")
-	public HTableWithIndexesDriver(Configuration conf, byte[] tableName) throws IOException {
+	public GlobalHTableWithIndexesDriver(Configuration conf, byte[] tableName) throws IOException {
         super(conf, tableName);
         HTableDescriptor dataTableDesc = null; 
         try {
@@ -29,7 +28,7 @@ public class HTableWithIndexesDriver extends HTable {
             throw new RuntimeException("TTERROR_" + (errorIndex++) + ": " + e1.getMessage());
         }
 
-        policyToMaterializeIndex = new MaterializeIndexByCompositeRowkey(); //TOREMOVE
+        policyToMaterializeIndex = new GlobalMaterializeIndexByCompositeRowkey(); //TOREMOVE
         initIndexTables(dataTableDesc, conf);
     }
     @SuppressWarnings("deprecation")
@@ -83,7 +82,7 @@ public class HTableWithIndexesDriver extends HTable {
 	@return, <dataValue in range, list of dataKeys>
     */
     protected Map<byte[], List<byte[]> > internalGetByIndexByRange(byte[] columnFamily, byte[] columnName, byte[] valueStart, byte[] valueStop) throws IOException {
-        HTable indexTable = getIndexTable(columnFamily, columnName);
+    	HTable indexTable = getIndexTable(columnFamily, columnName);
         return policyToMaterializeIndex.getByIndexByRange(indexTable, valueStart, valueStop);
     }
 
@@ -93,7 +92,7 @@ public class HTableWithIndexesDriver extends HTable {
     }
 
     public void deleteFromIndex(byte[] columnFamily, byte[] columnName, byte[] dataValue, byte[] dataKey) throws IOException {
-    	System.out.println(Bytes.toString(columnFamily)+"\t"+Bytes.toString(columnName)+"\t"+
+    	System.out.println("****************: global "+Bytes.toString(columnFamily)+"\t"+Bytes.toString(columnName)+"\t"+
     			Bytes.toString(dataValue)+"\t"+Bytes.toString(dataKey));
         HTable indexTable = getIndexTable(columnFamily, columnName);
         policyToMaterializeIndex.deleteFromIndex(indexTable, dataValue, dataKey);

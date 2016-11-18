@@ -1,17 +1,26 @@
 package ict.ictbase.test.local;
 
-import ict.ictbase.commons.local.HTableGetByLocalIndex;
+import ict.ictbase.commons.local.LocalHTableGetByIndex;
 import ict.ictbase.util.HIndexConstantsAndUtils;
 
 import java.io.IOException;
+import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.hbase.Cell;
+import org.apache.hadoop.hbase.CellUtil;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.client.Admin;
 import org.apache.hadoop.hbase.client.Connection;
 import org.apache.hadoop.hbase.client.ConnectionFactory;
 import org.apache.hadoop.hbase.client.Put;
+import org.apache.hadoop.hbase.client.Result;
+import org.apache.hadoop.hbase.client.ResultScanner;
+import org.apache.hadoop.hbase.client.Scan;
+import org.apache.hadoop.hbase.filter.CompareFilter.CompareOp;
+import org.apache.hadoop.hbase.filter.FilterList;
+import org.apache.hadoop.hbase.filter.SingleColumnValueFilter;
 import org.apache.hadoop.hbase.util.Bytes;
 
 public class PutSyncDeleteLocal {
@@ -22,7 +31,7 @@ public class PutSyncDeleteLocal {
 	
 	private static Configuration conf;
 	private static String coprocessorJarLoc = "hdfs://data8:9000/jar/ICTBase-1-0.0.1-SNAPSHOT.jar";
-	private static HTableGetByLocalIndex htable;
+	private static LocalHTableGetByIndex htable;
 	
 	private static String startKeyStr = "a";
 	private static String endKeyStr = "z";
@@ -45,15 +54,18 @@ public class PutSyncDeleteLocal {
 	}
 
 	public static void initCoProcessors(Configuration conf,
-			String coprocessorJarLoc, HTableGetByLocalIndex htable) throws Exception {
+			String coprocessorJarLoc, LocalHTableGetByIndex htable) throws Exception {
 		int coprocessorIndex = 1;
 		HIndexConstantsAndUtils.updateCoprocessor(conf, htable.getTableName(),
 				coprocessorIndex++, true, coprocessorJarLoc,
-				"ict.ictbase.coprocessor.local.LocalIndexObserverJustPut");
+				"ict.ictbase.coprocessor.local.LocalIndexBaselineObserver");
+		
+		HIndexConstantsAndUtils.updateCoprocessor(conf, htable.getTableName(),
+				coprocessorIndex++, true, coprocessorJarLoc,
+				"ict.ictbase.coprocessor.local.LocalIndexScanObserver");
 	}
 
 	public static void loadData() throws IOException {
-		// load data
 		char tmpChar = 97;
 		String tmpStr=null;
 		byte[] rowKey = null;
@@ -61,12 +73,68 @@ public class PutSyncDeleteLocal {
 			tmpStr = String.valueOf((char)(tmpChar+i));
 			rowKey = Bytes.toBytes(tmpStr);
 			Put p = new Put(rowKey);
+			long ts = 100+i;
 			p.addColumn(Bytes.toBytes(columnFamily),
-					Bytes.toBytes(indexedColumnName), 100 + i,
-					Bytes.toBytes("v" + i));
+					Bytes.toBytes(indexedColumnName), ts,
+					Bytes.toBytes("100"));
+			p.setAttribute("put_time_version", Bytes.toBytes(ts));
 			htable.put(p);
 		}
-
+		Put p = new Put(Bytes.toBytes("n"));
+		long ts = 120;
+		p.addColumn(Bytes.toBytes(columnFamily),
+				Bytes.toBytes(indexedColumnName), ts,
+				Bytes.toBytes("111"));
+		p.setAttribute("put_time_version", Bytes.toBytes(ts));
+		htable.put(p);
+	}
+	
+	public static void loadAndDeleteData() throws IOException {
+		String tmpStr="e";
+		byte[] rowKey = null;
+		for (int i = 10; i < 20; i++) {
+			rowKey = Bytes.toBytes(tmpStr);
+			Put p = new Put(rowKey);
+			long ts = 100+i;
+			p.addColumn(Bytes.toBytes(columnFamily),
+					Bytes.toBytes(indexedColumnName), ts,
+					Bytes.toBytes("v" + i));
+			p.setAttribute("put_time_version", Bytes.toBytes(ts));
+			htable.put(p);
+		}
+	}
+	
+	
+	
+	
+	public static void getResultFromScan(LocalHTableGetByIndex htable){
+		Scan scan  = new Scan();
+		FilterList filterList  = new FilterList(FilterList.Operator.MUST_PASS_ALL);
+		SingleColumnValueFilter filter = new SingleColumnValueFilter(Bytes.toBytes(columnFamily),
+				Bytes.toBytes(indexedColumnName),CompareOp.EQUAL,Bytes.toBytes("100"));
+//		filter.setFilterIfMissing(true);
+		filterList.addFilter(filter);
+		scan.setFilter(filterList);
+//		scan.addColumn(Bytes.toBytes(columnFamily),Bytes.toBytes(indexedColumnName));
+	
+		try {
+			ResultScanner rs = htable.getScanner(scan);
+			Result r;
+			while((r=rs.next())!=null){
+				for(Cell cell : r.listCells()){
+					System.out.println("^^^^^^^^^^^^^^^^^^ getResultFromScan");
+					System.out.println(String.format("row:%s,family:%s,qualifier:%s,value:%s,timestamp:%s",
+							Bytes.toString(CellUtil.cloneRow(cell)),
+							Bytes.toString(CellUtil.cloneFamily(cell)),
+							Bytes.toString(CellUtil.cloneQualifier(cell)),
+							Bytes.toString(CellUtil.cloneValue(cell)),
+							cell.getTimestamp()));
+				}
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	
 	}
 
 	public static void main(String[] args) throws Exception {
@@ -77,12 +145,23 @@ public class PutSyncDeleteLocal {
 			indexedColumnName = args[2];
 
 		}
+		
 		initTables(conf, testTableName, columnFamily, indexedColumnName,startKeyStr,endKeyStr,numberOfRegions);
-		htable = new HTableGetByLocalIndex(conf, Bytes.toBytes(testTableName));
-
+		htable = new LocalHTableGetByIndex(conf, Bytes.toBytes(testTableName));
 		initCoProcessors(conf, coprocessorJarLoc, htable);
-
 		loadData();
+		
+//		loadAndDeleteData();
+		
+//		getResultFromScan(htable);
+		
+		List<String> res = htable.getByIndex(Bytes.toBytes(columnFamily),
+				Bytes.toBytes(indexedColumnName), Bytes.toBytes("100"));
+//		assert (res != null && res.size() != 0);
+//		for(int i =0;i<res.size();i++){
+//			System.out.println("Result is " + res.get(i));
+//		}
+		
 
 	}
 }

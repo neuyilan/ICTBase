@@ -1,12 +1,10 @@
 package ict.ictbase.test.global;
 
-import ict.ictbase.commons.global.HTableGetByIndex;
+import ict.ictbase.commons.global.GlobalHTableGetByIndex;
 import ict.ictbase.util.HIndexConstantsAndUtils;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
@@ -23,7 +21,7 @@ public class PutAsyncDelete {
 	private static String indexedColumnName = "country";
 	private static Configuration conf;
 	private static String coprocessorJarLoc = "hdfs://data8:9000/jar/ICTBase-1-0.0.1-SNAPSHOT.jar";
-	private static HTableGetByIndex htable;
+	private static GlobalHTableGetByIndex htable;
 
 	public static void initTables(Configuration conf, String testTableName,
 			String columnFamily, String indexedColumnName) throws Exception {
@@ -56,7 +54,7 @@ public class PutAsyncDelete {
 	}
 
 	public static void initCoProcessors(Configuration conf,
-			String coprocessorJarLoc, HTableGetByIndex htable) throws Exception {
+			String coprocessorJarLoc, GlobalHTableGetByIndex htable) throws Exception {
 		int coprocessorIndex = 1;
 		HIndexConstantsAndUtils.updateCoprocessor(conf, htable.getTableName(),
 				coprocessorIndex++, true, coprocessorJarLoc,
@@ -91,13 +89,13 @@ public class PutAsyncDelete {
 
 		}
 		initTables(conf, testTableName, columnFamily, indexedColumnName);
-		htable = new HTableGetByIndex(conf, Bytes.toBytes(testTableName));
+		htable = new GlobalHTableGetByIndex(conf, Bytes.toBytes(testTableName));
 		initCoProcessors(conf, coprocessorJarLoc, htable);
 
 		loadData();
 
 		// getByIndex
-		htable.configPolicy(HTableGetByIndex.PLY_FASTREAD);
+		htable.configPolicy(GlobalHTableGetByIndex.PLY_FASTREAD);
 		List<byte[]> res = htable.getByIndex(Bytes.toBytes(columnFamily),
 				Bytes.toBytes(indexedColumnName), Bytes.toBytes("v19"));
 		assert (res != null && res.size() != 0);

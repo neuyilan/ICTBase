@@ -14,8 +14,8 @@ import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.util.Bytes;
 
-public class HTableUpdateLocalIndexByPut extends HTableWithLocalIndexesDriver {
-	public HTableUpdateLocalIndexByPut(Configuration conf, byte[] tableName)
+public class LocalHTableUpdateIndexByPut extends LocalHTableWithIndexesDriver {
+	public LocalHTableUpdateIndexByPut(Configuration conf, byte[] tableName)
 			throws IOException {
 		super(conf, tableName);
 	}
@@ -27,14 +27,12 @@ public class HTableUpdateLocalIndexByPut extends HTableWithLocalIndexesDriver {
 	public void insertNewToIndexes(Put put, String regionStartKey)
 			throws IOException {
 		internalPrimitivePerPut(put, INSERT_INDEX, null, regionStartKey);
-		// String indexTable = Bytes.toString(this.getTableName());
-		// HRegionInfo regionInfo = e.getEnvironment().getRegionInfo();
-		// String regionSatrtKey = Bytes.toString(regionInfo.getStartKey());
-		// String index = put.get
-		// Put put = new Put();
-		// policyToMaterializeIndex.putToIndex(indexTable, dataValue, dataKey);
-		//
 	}
+	
+    public void readBaseAndDeleteOld(Put put,String regionStartKey) throws IOException {
+        Result readBaseResult = internalPrimitivePerPut(put, READ_BASE, null,regionStartKey);
+        internalPrimitivePerPut(put, DELETE_INDEX, readBaseResult,regionStartKey);
+    }
 
 	private Result internalPrimitivePerPut(Put put, int mode,
 			Result readResult4Delete, String regionStartKey) throws IOException {
@@ -71,15 +69,25 @@ public class HTableUpdateLocalIndexByPut extends HTableWithLocalIndexesDriver {
 						putToIndex(regionStartKey,indexedColumnFamily, indexedColumnName,
 								dataValuePerColumn, dataKey);
 					} else if (mode == READ_BASE) {
-						// read base
-						// TOREMOVE need specify timestamp to guarantee get old
-						// values.
 						long maxTs = Bytes.toLong(put
 								.getAttribute("put_time_version"));
 						get.setTimeRange(0, maxTs);
 						get.setMaxVersions();
 						get.addColumn(indexedColumnFamily, indexedColumnName);
 					} else {
+						//delete old from index
+                        Result readResultOld = readResult4Delete;
+                        List<Cell> list = readResultOld.listCells();
+                        if(list ==null){
+                        	break;
+                        }
+                        for(Cell cell : list){
+                        	byte[] oldDataValuePerColumn  = CellUtil.cloneValue(cell);
+                        	System.out.println("************* start delete, oldDataValuePerColumn \t"+Bytes.toString(oldDataValuePerColumn));
+                            deleteFromIndex(regionStartKey,indexedColumnFamily, indexedColumnName,
+                            		oldDataValuePerColumn, dataKey);
+                            break;// only needs to remove the first value in index table
+                        }
 					}
 				} else {
 					// the indexed column (family) is not associated with the

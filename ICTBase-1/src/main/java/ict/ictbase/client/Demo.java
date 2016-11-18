@@ -1,6 +1,6 @@
 package ict.ictbase.client;
 
-import ict.ictbase.commons.global.HTableGetByIndex;
+import ict.ictbase.commons.global.GlobalHTableGetByIndex;
 import ict.ictbase.util.HIndexConstantsAndUtils;
 
 import java.util.List;
@@ -38,11 +38,11 @@ public class Demo {
         }
     }
 
-    public static void initCoProcessors(Configuration conf, String coprocessorJarLoc, HTableGetByIndex htable) throws Exception {
+    public static void initCoProcessors(Configuration conf, String coprocessorJarLoc, GlobalHTableGetByIndex htable) throws Exception {
        int coprocessorIndex = 1;
        HIndexConstantsAndUtils.updateCoprocessor(conf, htable.getTableName(), coprocessorIndex++, true, coprocessorJarLoc, "ict.ictbase.coprocessor.IndexObserverwReadRepair");
 //       HIndexConstantsAndUtils.updateCoprocessor(conf, htable.getTableName(), coprocessorIndex++, true, coprocessorJarLoc, "ict.ictbase.coprocessor.PhysicalDeletionInCompaction");
-       htable.configPolicy(HTableGetByIndex.PLY_READCHECK);
+       htable.configPolicy(GlobalHTableGetByIndex.PLY_READCHECK);
     }
 
     public static void main(String[] args) throws Exception{
@@ -62,7 +62,7 @@ public class Demo {
        String coprocessorJarLoc="hdfs://data8:9000/jar/ICTBase-0.0.1-SNAPSHOT.jar";
 
        initTables(conf, testTableName, columnFamily, indexedColumnName);
-       HTableGetByIndex htable = new HTableGetByIndex(conf, Bytes.toBytes(testTableName));
+       GlobalHTableGetByIndex htable = new GlobalHTableGetByIndex(conf, Bytes.toBytes(testTableName));
        initCoProcessors(conf, coprocessorJarLoc, htable);
 
        //put value1
@@ -71,7 +71,7 @@ public class Demo {
        htable.put(p);
 
        //getByIndex
-       htable.configPolicy(HTableGetByIndex.PLY_FASTREAD);
+       htable.configPolicy(GlobalHTableGetByIndex.PLY_FASTREAD);
        List<byte[]> res = htable.getByIndex(Bytes.toBytes(columnFamily), Bytes.toBytes(indexedColumnName), Bytes.toBytes("v1"));
        assert(res != null && res.size() != 0);
        System.out.println("Result is " + Bytes.toString(res.get(0)));

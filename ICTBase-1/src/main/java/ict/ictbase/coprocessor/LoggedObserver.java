@@ -12,6 +12,7 @@ import org.apache.hadoop.hbase.client.Delete;
 import org.apache.hadoop.hbase.client.Durability;
 import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.Put;
+import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.coprocessor.BaseRegionObserver;
 import org.apache.hadoop.hbase.coprocessor.ObserverContext;
@@ -135,6 +136,28 @@ public class LoggedObserver extends BaseRegionObserver {
         //Returns: the scanner to use during compaction. Should not be null unless the implementation is writing new store files on its own. 
     }
 
+	@Override
+	public boolean preScannerNext(
+			final ObserverContext<RegionCoprocessorEnvironment> e,
+			final InternalScanner s, final List<Result> results,
+			final int limit, final boolean hasMore) throws IOException {
+		if(functionLevelLoggingEnabled){
+            LOG.debug("TTDEBUG_FUNC: preScannerNext()");
+        }
+		return hasMore;
+	}
+
+	@Override
+	public boolean postScannerNext(
+			final ObserverContext<RegionCoprocessorEnvironment> e,
+			final InternalScanner s, final List<Result> results,
+			final int limit, final boolean hasMore) throws IOException {
+		if(functionLevelLoggingEnabled){
+            LOG.debug("TTDEBUG_FUNC: postScannerNext()");
+        }
+		return hasMore;
+	}
+    
     @Override
     public void preClose(ObserverContext<RegionCoprocessorEnvironment> e, boolean abortRequested) { 
         if(functionLevelLoggingEnabled){

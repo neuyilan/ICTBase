@@ -1,6 +1,6 @@
 package ict.ictbase.util;
 
-import ict.ictbase.commons.global.HTableUpdateIndexByPut;
+import ict.ictbase.commons.global.GlobalHTableUpdateIndexByPut;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -16,9 +16,9 @@ import org.apache.hadoop.hbase.client.Put;
 
 public class QueueUtil {
 
-	private static Map<HTableUpdateIndexByPut, LinkedBlockingQueue<Put>> tablePutsQueueMap = null; //new HashMap<HTableUpdateIndexByPut, LinkedBlockingQueue<Put>>();
+	private static Map<GlobalHTableUpdateIndexByPut, LinkedBlockingQueue<Put>> tablePutsQueueMap = null; //new HashMap<HTableUpdateIndexByPut, LinkedBlockingQueue<Put>>();
 	private ExecutorService executor = null;
-	private HTableUpdateIndexByPut dataTableWithIndexes = null;
+	private GlobalHTableUpdateIndexByPut dataTableWithIndexes = null;
 	private LinkedBlockingQueue<Put> putsQueue = null;
 	private Put tempPut = null;
 
@@ -37,7 +37,7 @@ public class QueueUtil {
 		System.out.println("******************  coming the QueueUtil init method");
 		if(tablePutsQueueMap ==null){
 			System.out.println("******************  coming the QueueUtil init method tablePutsQueueMap == null");
-			tablePutsQueueMap = new HashMap<HTableUpdateIndexByPut, LinkedBlockingQueue<Put>>();
+			tablePutsQueueMap = new HashMap<GlobalHTableUpdateIndexByPut, LinkedBlockingQueue<Put>>();
 		}
 		Callable<Void> c = new Task();
 		MyFutureTask ft = new MyFutureTask(c);
@@ -72,7 +72,7 @@ public class QueueUtil {
 	
 
 	public void addTablePutQueueMap(
-			HTableUpdateIndexByPut dataTableWithIndexes, Put put) {
+			GlobalHTableUpdateIndexByPut dataTableWithIndexes, Put put) {
 		LinkedBlockingQueue<Put> tmpPutQueue = null;
 		if (tablePutsQueueMap.containsKey(dataTableWithIndexes)) {
 			tmpPutQueue = tablePutsQueueMap.get(dataTableWithIndexes);
@@ -103,9 +103,9 @@ public class QueueUtil {
 	
 	class Task implements Callable<Void>{
 		public Void call() throws Exception {
-			for (Iterator<Map.Entry<HTableUpdateIndexByPut, LinkedBlockingQueue<Put>>> it = tablePutsQueueMap
+			for (Iterator<Map.Entry<GlobalHTableUpdateIndexByPut, LinkedBlockingQueue<Put>>> it = tablePutsQueueMap
 					.entrySet().iterator(); it.hasNext();) {
-				Map.Entry<HTableUpdateIndexByPut, LinkedBlockingQueue<Put>> entry = it
+				Map.Entry<GlobalHTableUpdateIndexByPut, LinkedBlockingQueue<Put>> entry = it
 						.next();
 				dataTableWithIndexes = entry.getKey();
 				putsQueue = entry.getValue();

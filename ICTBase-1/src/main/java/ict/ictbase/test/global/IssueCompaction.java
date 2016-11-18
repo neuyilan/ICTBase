@@ -22,7 +22,7 @@ package ict.ictbase.test.global;
  describe 'testtable2'
  */
 
-import ict.ictbase.commons.global.HTableGetByIndex;
+import ict.ictbase.commons.global.GlobalHTableGetByIndex;
 import ict.ictbase.util.HIndexConstantsAndUtils;
 
 import java.io.IOException;
@@ -50,7 +50,7 @@ public class IssueCompaction {
 	static byte[] indexTableName = null;
 	static String coprocessorJarLoc = "hdfs://data8:9000/jar/ICTBase-1-0.0.1-SNAPSHOT.jar";
 
-	static HTableGetByIndex htable = null;
+	static GlobalHTableGetByIndex htable = null;
 	static Configuration conf = null;
 	static byte[] rowKey = Bytes.toBytes("key1");
 
@@ -73,7 +73,7 @@ public class IssueCompaction {
 		// create index table
 		HIndexConstantsAndUtils.createAndConfigIndexTable(conf, indexTableName,
 				columnFamily);
-		htable = new HTableGetByIndex(conf, dataTableName);
+		htable = new GlobalHTableGetByIndex(conf, dataTableName);
 	}
 
 	static void fakedLoadData(byte[] dataTableName) throws IOException {

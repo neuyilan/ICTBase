@@ -12,13 +12,13 @@ import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.util.Bytes;
 
-public class HTableGetByIndex extends HTableWithIndexesDriver {
+public class GlobalHTableGetByIndex extends GlobalHTableWithIndexesDriver {
 
 	int policyReadIndex;
 	public static final int PLY_FASTREAD = 0;
 	public static final int PLY_READCHECK = 1;
 
-	public HTableGetByIndex(Configuration conf, byte[] tableName)
+	public GlobalHTableGetByIndex(Configuration conf, byte[] tableName)
 			throws IOException {
 		super(conf, tableName);
 		// default is baseline
@@ -100,11 +100,7 @@ public class HTableGetByIndex extends HTableWithIndexesDriver {
 			throws IOException {
 		assert valueStart != null;
 		assert valueEnd != null;
-		assert Bytes.toString(valueStart).compareTo(Bytes.toString(valueEnd)) < 0; // assert
-																					// valueStart
-																					// <
-																					// valueEnd,
-																					// lexicographically;
+		assert Bytes.toString(valueStart).compareTo(Bytes.toString(valueEnd)) < 0; 
 		return internalGetByIndexByRange(columnFamily, columnName, valueStart,
 				Bytes.toBytes(Bytes.toString(valueEnd) + "0"));
 	}

@@ -13,8 +13,8 @@ import java.util.List;
 
 import ict.ictbase.util.HIndexConstantsAndUtils;
 
-public class HTableUpdateIndexByPut extends HTableWithIndexesDriver {
-	public HTableUpdateIndexByPut(Configuration conf, byte[] tableName) throws IOException {
+public class GlobalHTableUpdateIndexByPut extends GlobalHTableWithIndexesDriver {
+	public GlobalHTableUpdateIndexByPut(Configuration conf, byte[] tableName) throws IOException {
         super(conf, tableName);
     }
 

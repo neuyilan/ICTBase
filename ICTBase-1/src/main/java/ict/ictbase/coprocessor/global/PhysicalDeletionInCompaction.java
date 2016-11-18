@@ -1,6 +1,6 @@
 package ict.ictbase.coprocessor.global;
 
-import ict.ictbase.commons.global.HTableWithIndexesDriver;
+import ict.ictbase.commons.global.GlobalHTableWithIndexesDriver;
 import ict.ictbase.coprocessor.LoggedObserver;
 
 import java.io.IOException;
@@ -57,10 +57,10 @@ public class PhysicalDeletionInCompaction extends BasicIndexObserver {
 
 	static class TTScannerWrapper implements InternalScanner {
 		StoreScanner delegate;
-		HTableWithIndexesDriver htablewIndexes;
+		GlobalHTableWithIndexesDriver htablewIndexes;
 		Set<String> indexed;
 
-		public TTScannerWrapper(StoreScanner d, HTableWithIndexesDriver h)
+		public TTScannerWrapper(StoreScanner d, GlobalHTableWithIndexesDriver h)
 				throws IOException {
 			this.delegate = d;
 			this.htablewIndexes = h;

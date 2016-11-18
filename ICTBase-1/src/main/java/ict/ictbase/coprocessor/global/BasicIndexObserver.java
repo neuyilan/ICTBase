@@ -1,6 +1,6 @@
 package ict.ictbase.coprocessor.global;
 
-import ict.ictbase.commons.global.HTableUpdateIndexByPut;
+import ict.ictbase.commons.global.GlobalHTableUpdateIndexByPut;
 import ict.ictbase.coprocessor.LoggedObserver;
 import ict.ictbase.util.QueueUtil;
 
@@ -26,14 +26,14 @@ import org.apache.hadoop.hbase.regionserver.wal.WALEdit;
 public class BasicIndexObserver extends LoggedObserver {
     private boolean initialized;
 
-    protected HTableUpdateIndexByPut dataTableWithIndexes = null;
+    protected GlobalHTableUpdateIndexByPut dataTableWithIndexes = null;
     protected QueueUtil queueUtil =null;
     private void tryInitialize(HTableDescriptor desc) throws IOException {
         if(initialized == false) {
             synchronized(this) {
                 if(initialized == false) {
                     Configuration conf = HBaseConfiguration.create();
-                    dataTableWithIndexes = new HTableUpdateIndexByPut(conf, desc.getTableName().getName()); //this will make copy of data table instance.
+                    dataTableWithIndexes = new GlobalHTableUpdateIndexByPut(conf, desc.getTableName().getName()); //this will make copy of data table instance.
                     queueUtil = new QueueUtil();
                     initialized = true;
                 }

@@ -11,6 +11,7 @@ public class IndexObserverBaseline extends BasicIndexObserver {
     @Override
     public void prePut(final ObserverContext<RegionCoprocessorEnvironment> e, final Put put, final WALEdit edit, final Durability durability) throws IOException {
         super.prePut(e, put, edit, durability);
+        System.out.println("**************global IndexObserverBaseline");
         dataTableWithIndexes.insertNewToIndexes(put);
         dataTableWithIndexes.readBaseAndDeleteOld(put);
     }

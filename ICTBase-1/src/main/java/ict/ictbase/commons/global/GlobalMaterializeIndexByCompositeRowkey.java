@@ -1,6 +1,4 @@
 package ict.ictbase.commons.global;
-import ict.ictbase.commons.MaterializeIndex;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -23,7 +21,7 @@ import org.apache.hadoop.hbase.filter.PrefixFilter;
 import org.apache.hadoop.hbase.util.Bytes;
 
 // specific to index materialization by composite index rowkey (i.e., indexRowKey=value/key)
-public class MaterializeIndexByCompositeRowkey implements MaterializeIndex {
+public class GlobalMaterializeIndexByCompositeRowkey implements GlobalMaterializeIndex {
 //using scanner
     public Map<byte[], List<byte[]> > getByIndexByRange(HTable indexTable, byte[] valueStart, byte[] valueStop) throws IOException {
         //read against index table
@@ -78,17 +76,6 @@ public class MaterializeIndexByCompositeRowkey implements MaterializeIndex {
         //del.setTimestamp(timestamp);
         indexTable.delete(del);
     }
-
-	@Override
-	/**
-	 * for local index
-	 */
-	public void putToIndex(HTable dataTable, String regionStartKey,
-			byte[] columnFamily, byte[] columnName, byte[] dataValue,
-			byte[] dataKey) throws IOException {
-		
-	}
-
 }
 
 class IndexStorageFormat {
