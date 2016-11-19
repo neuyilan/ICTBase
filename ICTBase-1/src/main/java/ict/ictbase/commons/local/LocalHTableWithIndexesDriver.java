@@ -99,7 +99,6 @@ public class LocalHTableWithIndexesDriver extends HTable {
     */
     protected List<String> internalGetByIndexByRange(byte[] columnFamily, byte[] columnName, byte[] valueStart, byte[] valueStop) throws IOException {
     	HTable indexTable = getIndexTable(columnFamily, columnName);
-    	System.out.println("****************internalGetByIndexByRange indexTable.getTableName() :"+Bytes.toString(indexTable.getTableName()));
     	return policyToMaterializeIndex.getByIndexByRange(indexTable, valueStart, valueStop,columnFamily,columnName);
     }
 

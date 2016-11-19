@@ -5,6 +5,9 @@ import ict.ictbase.util.HIndexConstantsAndUtils;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.NavigableSet;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.Cell;
@@ -115,8 +118,30 @@ public class PutSyncDeleteLocal {
 //		filter.setFilterIfMissing(true);
 		filterList.addFilter(filter);
 		scan.setFilter(filterList);
-//		scan.addColumn(Bytes.toBytes(columnFamily),Bytes.toBytes(indexedColumnName));
+		scan.addColumn(Bytes.toBytes(columnFamily),Bytes.toBytes(indexedColumnName));
 	
+//		/**************************************************/
+//		 String startRow = Bytes.toString(scan.getStartRow());	
+//		  String stopRow = Bytes.toString(scan.getStopRow());	
+//		  System.out.println("********** startRow: "+startRow+",    stopRow: "+stopRow);
+//		  byte[][] tmpBytes = scan.getFamilies();
+//		  
+//		  for(byte [] tb: tmpBytes){
+//			  System.out.println("********** family:"+Bytes.toString(tb));
+//		  }
+//		  System.out.println("********** filter:"+ scan.getFilter().toString());
+//		  Map<byte[], NavigableSet<byte[]>>  tmpMap = scan.getFamilyMap();
+//		  
+//		  for(Entry<byte[], NavigableSet<byte[]>> entry: tmpMap.entrySet()){
+//			  System.out.println("********** entry.getKey:"+Bytes.toString(entry.getKey()));
+//			  NavigableSet<byte[]> tmpV = entry.getValue();
+//			  while(!tmpV.isEmpty()){
+//				  System.out.println("********* map value "+Bytes.toString(tmpV.pollFirst()));
+//			  }
+//			  
+//		  }
+//		  /**************************************************/
+		
 		try {
 			ResultScanner rs = htable.getScanner(scan);
 			Result r;

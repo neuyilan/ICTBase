@@ -29,10 +29,9 @@ public class LocalHTableGetByIndex extends LocalHTableWithIndexesDriver {
 	public List<String> getByIndex(byte[] columnFamily, byte[] columnName,
 			byte[] value) throws IOException {
 		if(isExistIndex(columnFamily, columnName)){
-			System.out.println("HTableGetByLocalIndex********: true");
 			return internalGetByIndexByRange(columnFamily,columnName,value,null);
 		}else{
-			System.out.println("HTableGetByLocalIndex********: false");
+			System.out.println("data table do not contain the index column, so can not use secondary local index");
 		}
 		return null;
 	}

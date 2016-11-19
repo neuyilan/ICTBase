@@ -16,9 +16,11 @@ import org.apache.hadoop.hbase.client.Durability;
 import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Result;
+import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.coprocessor.ObserverContext;
 import org.apache.hadoop.hbase.coprocessor.RegionCoprocessorEnvironment;
 import org.apache.hadoop.hbase.regionserver.InternalScanner;
+import org.apache.hadoop.hbase.regionserver.RegionScanner;
 import org.apache.hadoop.hbase.regionserver.ScanType;
 import org.apache.hadoop.hbase.regionserver.Store;
 import org.apache.hadoop.hbase.regionserver.wal.WALEdit;
@@ -34,7 +36,7 @@ public class LocalIndexBasicObserver extends LoggedObserver {
 				if (initialized == false) {
 					Configuration conf = HBaseConfiguration.create();
 					dataTableWithLocalIndexes = new LocalHTableUpdateIndexByPut(
-							conf, desc.getTableName().getName()); 
+							conf, desc.getTableName().getName());
 					initialized = true;
 				}
 			}
@@ -81,15 +83,12 @@ public class LocalIndexBasicObserver extends LoggedObserver {
 		return toRet;
 	}
 
-
 	@Override
 	public void preGetOp(ObserverContext<RegionCoprocessorEnvironment> e,
 			Get get, List<Cell> result) throws IOException {
 		super.preGetOp(e, get, result);
 		tryInitialize(e.getEnvironment().getRegion().getTableDesc());
 	}
-
-	
 
 	@Override
 	public boolean preScannerNext(
@@ -110,7 +109,15 @@ public class LocalIndexBasicObserver extends LoggedObserver {
 		tryInitialize(e.getEnvironment().getRegion().getTableDesc());
 		return hasMore;
 	}
-	
+
+	@Override
+	public RegionScanner preScannerOpen(
+			final ObserverContext<RegionCoprocessorEnvironment> e,
+			final Scan scan, final RegionScanner s) throws IOException {
+		super.preScannerOpen(e, scan, s);
+		return s;
+	}
+
 	@Override
 	public void stop(CoprocessorEnvironment e) throws IOException {
 		super.stop(e);
