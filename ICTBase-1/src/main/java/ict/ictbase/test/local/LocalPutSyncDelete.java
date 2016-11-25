@@ -26,7 +26,7 @@ import org.apache.hadoop.hbase.filter.FilterList;
 import org.apache.hadoop.hbase.filter.SingleColumnValueFilter;
 import org.apache.hadoop.hbase.util.Bytes;
 
-public class PutSyncDeleteLocal {
+public class LocalPutSyncDelete {
 	private static String testTableName = "test_local_sync_delete";
 	private static String columnFamily = "cf";
 	private static String indexedColumnName = "country";

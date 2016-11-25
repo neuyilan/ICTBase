@@ -73,10 +73,7 @@ public class GlobalHTableUpdateIndexByPut extends GlobalHTableWithIndexesDriver 
                         	long ts = cell.getTimestamp();
                         	boolean isDelete = deleteFromIndex(indexedColumnFamily, indexedColumnName, oldDataValuePerColumn, dataKey);
                         	if(isDelete){
-                        		System.out.println("&&&&&&&&&&&&&&&&&&&& delete true");
                         		deleteFromBaseTable(dataKey,ts);
-                        	}else{
-                        		System.out.println("&&&&&&&&&&&&&&&&&&&& delete false");
                         	}
                            // break;// only needs to remove the first value in index table
                         }

@@ -23,23 +23,26 @@ import org.apache.hadoop.hbase.regionserver.ScanType;
 import org.apache.hadoop.hbase.regionserver.Store;
 import org.apache.hadoop.hbase.regionserver.wal.WALEdit;
 
-public class BasicIndexObserver extends LoggedObserver {
+public class GlobalIndexBasicObserver extends LoggedObserver {
     private boolean initialized;
 
+    
     protected GlobalHTableUpdateIndexByPut dataTableWithIndexes = null;
-    protected QueueUtil queueUtil =null;
+    protected QueueUtil queueUtil = null;
+    
     private void tryInitialize(HTableDescriptor desc) throws IOException {
         if(initialized == false) {
             synchronized(this) {
                 if(initialized == false) {
                     Configuration conf = HBaseConfiguration.create();
                     dataTableWithIndexes = new GlobalHTableUpdateIndexByPut(conf, desc.getTableName().getName()); //this will make copy of data table instance.
-                    queueUtil = new QueueUtil();
+                    queueUtil = new QueueUtil(dataTableWithIndexes);
                     initialized = true;
                 }
             }
         }
     }
+    
 
     @Override
     public void start(CoprocessorEnvironment e) throws IOException {
@@ -78,7 +81,7 @@ public class BasicIndexObserver extends LoggedObserver {
         super.preGetOp(e, get, result);
         tryInitialize(e.getEnvironment().getRegion().getTableDesc());
     }
-
+    
     @Override
     public void stop(CoprocessorEnvironment e) throws IOException { 
         super.stop(e);

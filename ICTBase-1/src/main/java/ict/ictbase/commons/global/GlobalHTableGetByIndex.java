@@ -21,7 +21,6 @@ public class GlobalHTableGetByIndex extends GlobalHTableWithIndexesDriver {
 	public GlobalHTableGetByIndex(Configuration conf, byte[] tableName)
 			throws IOException {
 		super(conf, tableName);
-		// default is baseline
 		configPolicy(PLY_FASTREAD);
 	}
 
@@ -38,10 +37,8 @@ public class GlobalHTableGetByIndex extends GlobalHTableWithIndexesDriver {
 		List<byte[]> rawResults = readIndexOnly(columnFamily, columnName, value);
 		List<byte[]> datakeyToDels = new ArrayList<byte[]>();
 		if (policyReadIndex == PLY_READCHECK) {
-			// perform read repair
 			if (rawResults != null) {
 				for (byte[] dataRowkey : rawResults) {
-					// read in base table to verify
 					byte[] valueFromBase = readBase(dataRowkey, columnFamily,
 							columnName);
 					if (!Bytes.equals(valueFromBase, value)) {
@@ -76,25 +73,17 @@ public class GlobalHTableGetByIndex extends GlobalHTableWithIndexesDriver {
 		if (res == null || res.size() == 0) {
 			return null;
 		} else {
-			// System.out.print("index read res-" + res.size() + ": ");
 			List<byte[]> toRet = new ArrayList<byte[]>();
 			for (Map.Entry<byte[], List<byte[]>> e : res.entrySet()) {
-				// System.out.print(Bytes.toString(e.getKey()));
 				List<byte[]> keys = e.getValue();
-				// System.out.print("=>{");
 				for (byte[] key : keys) {
 					toRet.add(key);
-					// System.out.print(Bytes.toString(key) + ",");
 				}
-				// System.out.print("}");
 			}
-			// System.out.println();
 			return toRet;
 		}
 	}
 
-	// note valueEnd is inclusive.
-	// TODO
 	public Map<byte[], List<byte[]>> getByIndexByRange(byte[] columnFamily,
 			byte[] columnName, byte[] valueStart, byte[] valueEnd)
 			throws IOException {

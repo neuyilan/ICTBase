@@ -113,8 +113,8 @@ public class HIndexConstantsAndUtils {
 		// configure to set KEEP_DELETED_CELLS => 'true'
 		descColFamily.setKeepDeletedCells(KeepDeletedCells.TRUE);
 		descColFamily.setTimeToLive(HConstants.FOREVER);
-		descColFamily.setMaxVersions(Integer.MAX_VALUE);
-//		descColFamily.setMaxVersions(1);
+//		descColFamily.setMaxVersions(Integer.MAX_VALUE);
+		descColFamily.setMaxVersions(1);
 		desc.addFamily(descColFamily);
 		admin.createTable(desc);
 	}

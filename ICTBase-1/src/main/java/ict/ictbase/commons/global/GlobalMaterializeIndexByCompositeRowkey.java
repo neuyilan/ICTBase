@@ -8,6 +8,7 @@ import java.util.Map;
 import org.apache.hadoop.hbase.Cell;
 import org.apache.hadoop.hbase.CellUtil;
 import org.apache.hadoop.hbase.client.Delete;
+import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.HTable;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Result;
@@ -70,11 +71,20 @@ public class GlobalMaterializeIndexByCompositeRowkey implements GlobalMaterializ
         indexTable.put(put2Index);
     }
 
-    public void deleteFromIndex(HTable indexTable, byte[] dataValue, byte[] dataKey) throws IOException {
+    public boolean deleteFromIndex(HTable indexTable, byte[] dataValue, byte[] dataKey) throws IOException {
         byte[] indexRowkey = IndexStorageFormat.generateIndexRowkey(dataKey, dataValue);
-        Delete del = new Delete(indexRowkey);
-        //del.setTimestamp(timestamp);
-        indexTable.delete(del);
+        Get get = new Get(indexRowkey);
+        
+        Result r = indexTable.get(get);
+        
+        if(r.isEmpty()){
+        	return false;
+        }else{
+        	 Delete del = new Delete(indexRowkey);
+             //del.setTimestamp(timestamp);
+             indexTable.delete(del);
+        }
+        return true;
     }
 }
 

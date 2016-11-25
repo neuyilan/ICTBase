@@ -15,7 +15,6 @@ import org.apache.hadoop.hbase.util.Bytes;
 
 public class LocalMaterializeIndexByCompositeRowkey implements LocalMaterializeIndex {
   
-	@Override
 	public List<String> getByIndexByRange(HTable indexTable,
 			byte[] valueStart, byte[] valueStop,byte[] columnFamily, byte[] columnName) throws IOException {
         Scan scan = new Scan();
@@ -46,7 +45,6 @@ public class LocalMaterializeIndexByCompositeRowkey implements LocalMaterializeI
         return toRet;
 	}
 
-	@Override
 	public void putToIndex(HTable dataTable,String regionStartKey,byte [] columnFamily ,byte [] columnName,byte []  dataValue,byte []  dataKey)
 			throws IOException {
 		String indexRowkey = regionStartKey+"#"+Bytes.toString(columnFamily)+"#"+Bytes.toString(columnName)+"#"
@@ -57,7 +55,6 @@ public class LocalMaterializeIndexByCompositeRowkey implements LocalMaterializeI
 	}
 
 	
-	@Override
 	public void deleteFromIndex( HTable dataTable,String regionStartKey,byte [] columnFamily ,byte [] columnName,byte []  dataValue,byte []  dataKey) throws IOException {
 		String indexRowkey = regionStartKey+"#"+Bytes.toString(columnFamily)+"#"+Bytes.toString(columnName)+"#"
 				+Bytes.toString(dataValue)+"#"+Bytes.toString(dataKey);

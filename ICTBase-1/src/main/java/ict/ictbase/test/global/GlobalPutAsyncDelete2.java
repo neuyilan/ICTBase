@@ -15,14 +15,20 @@ import org.apache.hadoop.hbase.client.ConnectionFactory;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.util.Bytes;
 
-public class PutSyncDelete {
-	private static String testTableName = "test_sync_delete";
+public class GlobalPutAsyncDelete2 {
+	private static String testTableName = "test_async_delete";
 	private static String columnFamily = "cf";
 	private static String indexedColumnName = "country";
 	private static Configuration conf;
 	private static String coprocessorJarLoc = "hdfs://data8:9000/jar/ICTBase-1-0.0.1-SNAPSHOT.jar";
 	private static GlobalHTableGetByIndex htable;
 
+	
+	private static String startKeyStr = "a";
+	private static String endKeyStr = "z";
+	private static int numberOfRegions = 10;
+	private static String INDEXTABLE_COLUMNFAMILY = "JUST_FOR_TEST_CF";
+	
 	public static void initTables(Configuration conf, String testTableName,
 			String columnFamily, String indexedColumnName) throws Exception {
 		Connection con = ConnectionFactory.createConnection(conf);
@@ -32,12 +38,19 @@ public class PutSyncDelete {
 		if (admin.isTableAvailable(tn)) {
 			HIndexConstantsAndUtils.deleteTable(conf,
 					Bytes.toBytes(testTableName));
-			System.out.println("*******************");
 		}
 
-		HIndexConstantsAndUtils.createAndConfigBaseTable(conf,
-				Bytes.toBytes(testTableName), Bytes.toBytes(columnFamily),
-				new String[] { indexedColumnName });
+		
+//		HIndexConstantsAndUtils.createAndConfigBaseTable(conf,
+//				Bytes.toBytes(testTableName), Bytes.toBytes(columnFamily),
+//				new String[] { indexedColumnName });
+		
+		
+		HIndexConstantsAndUtils.createAndConfigAndSplitBaseTable(conf,
+				Bytes.toBytes(testTableName), Bytes.toBytes(columnFamily),Bytes.toBytes(INDEXTABLE_COLUMNFAMILY),
+				new String[] { indexedColumnName },startKeyStr,endKeyStr,numberOfRegions);
+		
+		
 
 		byte[] indexTableName = HIndexConstantsAndUtils.generateIndexTableName(
 				Bytes.toBytes(testTableName), Bytes.toBytes(columnFamily),
@@ -46,7 +59,6 @@ public class PutSyncDelete {
 		TableName indexTN = TableName.valueOf(indexTableName);
 
 		if (admin.isTableAvailable(indexTN)) {
-			System.out.println("**********5555555*********");
 			HIndexConstantsAndUtils.deleteTable(conf, indexTableName);
 		}
 
@@ -59,29 +71,50 @@ public class PutSyncDelete {
 		int coprocessorIndex = 1;
 		HIndexConstantsAndUtils.updateCoprocessor(conf, htable.getTableName(),
 				coprocessorIndex++, true, coprocessorJarLoc,
-				"ict.ictbase.coprocessor.global.IndexObserverBaseline");
+				"ict.ictbase.coprocessor.global.IndexObserverAsyncMaintain");
 
-//		HIndexConstantsAndUtils.updateCoprocessor(conf, htable.getTableName(),
-//				coprocessorIndex++, true, coprocessorJarLoc,
-//				"ict.ictbase.coprocessor.PhysicalDeletionInCompaction");
-//		htable.configPolicy(HTableGetByIndex.PLY_READCHECK);
 	}
 
 	public static void loadData() throws IOException {
 		// load data
-		String rowkeyStr = "key_sync";
+		String rowkeyStr = "key_async";
 		byte[] rowKey = Bytes.toBytes(rowkeyStr);
-		for (int i = 0; i < 5; i++) {
+		for (int i = 20000; i < 40000; i++) {
+			Put p = new Put(rowKey);
+			long value = i;
+			
+//			long ts = System.currentTimeMillis();
+//			p.addColumn(Bytes.toBytes(columnFamily),
+//					Bytes.toBytes(indexedColumnName), ts,
+//					Bytes.toBytes("vb" + value));
+//			p.setAttribute("put_time_version", Bytes.toBytes(ts));
+			
+			p.addColumn(Bytes.toBytes(columnFamily),
+					Bytes.toBytes(indexedColumnName),
+					Bytes.toBytes("vb" + value));
+			
+			htable.put(p);
+		}
+	}
+	
+	
+	public static void loadData2MutilRegion() throws IOException {
+		char tmpChar = 97;
+		String tmpStr=null;
+		byte[] rowKey = null;
+		for (int i = 0; i < 20; i++) {
+			tmpStr = String.valueOf((char)(tmpChar+i));
+			rowKey = Bytes.toBytes(tmpStr);
 			Put p = new Put(rowKey);
 			long ts = 100+i;
 			p.addColumn(Bytes.toBytes(columnFamily),
 					Bytes.toBytes(indexedColumnName), ts,
-					Bytes.toBytes("v" + i));
+					Bytes.toBytes("value"+ts));
 			p.setAttribute("put_time_version", Bytes.toBytes(ts));
 			htable.put(p);
 		}
-
 	}
+	
 
 	public static void main(String[] args) throws Exception {
 		conf = HBaseConfiguration.create();
@@ -91,17 +124,18 @@ public class PutSyncDelete {
 			indexedColumnName = args[2];
 
 		}
-		initTables(conf, testTableName, columnFamily, indexedColumnName);
+//		initTables(conf, testTableName, columnFamily, indexedColumnName);
 		htable = new GlobalHTableGetByIndex(conf, Bytes.toBytes(testTableName));
-
-		initCoProcessors(conf, coprocessorJarLoc, htable);
+//		initCoProcessors(conf, coprocessorJarLoc, htable);
 
 		loadData();
 
+//		loadData2MutilRegion();
+		
 		// getByIndex
 		htable.configPolicy(GlobalHTableGetByIndex.PLY_FASTREAD);
 		List<byte[]> res = htable.getByIndex(Bytes.toBytes(columnFamily),
-				Bytes.toBytes(indexedColumnName), Bytes.toBytes("v4"));
+				Bytes.toBytes(indexedColumnName), Bytes.toBytes("v10"));
 		assert (res != null && res.size() != 0);
 		System.out.println("Result is " + Bytes.toString(res.get(0)));
 	}

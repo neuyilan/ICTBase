@@ -8,6 +8,7 @@ import java.util.Map;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HTableDescriptor;
+import org.apache.hadoop.hbase.client.Delete;
 import org.apache.hadoop.hbase.client.HTable;
 import org.apache.hadoop.hbase.util.Bytes;
 
@@ -91,11 +92,17 @@ public class GlobalHTableWithIndexesDriver extends HTable {
         policyToMaterializeIndex.putToIndex(indexTable, dataValue, dataKey);
     }
 
-    public void deleteFromIndex(byte[] columnFamily, byte[] columnName, byte[] dataValue, byte[] dataKey) throws IOException {
+    public boolean deleteFromIndex(byte[] columnFamily, byte[] columnName, byte[] dataValue, byte[] dataKey) throws IOException {
     	System.out.println("****************: global "+Bytes.toString(columnFamily)+"\t"+Bytes.toString(columnName)+"\t"+
     			Bytes.toString(dataValue)+"\t"+Bytes.toString(dataKey));
         HTable indexTable = getIndexTable(columnFamily, columnName);
-        policyToMaterializeIndex.deleteFromIndex(indexTable, dataValue, dataKey);
+       boolean isDeleted  =  policyToMaterializeIndex.deleteFromIndex(indexTable, dataValue, dataKey);
+       return isDeleted;
     }
+    public void deleteFromBaseTable (byte [] dataKey,long ts) throws IOException{
+    	Delete delete = new Delete(dataKey,ts);
+    	this.delete(delete);
+    }
+    
 }
 
