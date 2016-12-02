@@ -26,7 +26,7 @@ import org.apache.hadoop.hbase.filter.FilterList;
 import org.apache.hadoop.hbase.filter.SingleColumnValueFilter;
 import org.apache.hadoop.hbase.util.Bytes;
 
-public class LocalPutSyncDelete {
+public class LocalPutSyncDelete2 {
 	private static String testTableName = "test_local_sync_delete";
 	private static String columnFamily = "cf";
 	private static String indexedColumnName = "country";
@@ -64,7 +64,7 @@ public class LocalPutSyncDelete {
 				"ict.ictbase.coprocessor.local.LocalIndexBaselineObserver");
 		
 		HIndexConstantsAndUtils.updateCoprocessor(conf, htable.getTableName(),
-				coprocessorIndex++, false, coprocessorJarLoc,
+				coprocessorIndex++, true, coprocessorJarLoc,
 				"ict.ictbase.coprocessor.local.LocalIndexScanObserver");
 	}
 
@@ -76,10 +76,9 @@ public class LocalPutSyncDelete {
 			tmpStr = String.valueOf((char)(tmpChar+i));
 			rowKey = Bytes.toBytes(tmpStr);
 			Put p = new Put(rowKey);
-			
 			p.addColumn(Bytes.toBytes(columnFamily),
 					Bytes.toBytes(indexedColumnName),
-					Bytes.toBytes("va"+i));
+					Bytes.toBytes("vb"+i));
 			
 			htable.put(p);
 		}
@@ -88,11 +87,11 @@ public class LocalPutSyncDelete {
 	public static void loadData2() throws IOException {
 		String rowStr = "aaa";
 		byte[] rowKey;
-		for (int i = 0; i < 10000; i++) {
+		for (int i = 10000; i < 20000; i++) {
 			rowKey = Bytes.toBytes(rowStr);
 			Put p = new Put(rowKey);
 			p.addColumn(Bytes.toBytes(columnFamily),
-					Bytes.toBytes(indexedColumnName), Bytes.toBytes("va" + i));
+					Bytes.toBytes(indexedColumnName), Bytes.toBytes("vb" + i));
 			htable.put(p);
 		}
 	}
@@ -176,9 +175,9 @@ public class LocalPutSyncDelete {
 
 		}
 		
-		initTables(conf, testTableName, columnFamily, indexedColumnName,startKeyStr,endKeyStr,numberOfRegions);
+//		initTables(conf, testTableName, columnFamily, indexedColumnName,startKeyStr,endKeyStr,numberOfRegions);
 		htable = new LocalHTableGetByIndex(conf, Bytes.toBytes(testTableName));
-		initCoProcessors(conf, coprocessorJarLoc, htable);
+//		initCoProcessors(conf, coprocessorJarLoc, htable);
 		loadData2();
 		
 //		loadAndDeleteData();

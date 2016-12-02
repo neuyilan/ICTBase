@@ -7,25 +7,20 @@ import java.util.Map.Entry;
 
 import org.apache.hadoop.hbase.Cell;
 import org.apache.hadoop.hbase.CellUtil;
-import org.apache.hadoop.hbase.HRegionInfo;
 import org.apache.hadoop.hbase.client.Durability;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.coprocessor.ObserverContext;
 import org.apache.hadoop.hbase.coprocessor.RegionCoprocessorEnvironment;
-import org.apache.hadoop.hbase.regionserver.Region;
 import org.apache.hadoop.hbase.regionserver.wal.WALEdit;
 import org.apache.hadoop.hbase.util.Bytes;
-import org.apache.hadoop.hbase.util.EnvironmentEdgeManager;
 
-public class LocalIndexJusuPutObserver extends LocalIndexBasicObserver {
-
+public class LocalIndexObserverAsyncMaintain extends LocalIndexBasicObserver {
 	@Override
 	public void prePut(final ObserverContext<RegionCoprocessorEnvironment> e,
 			final Put put, final WALEdit edit, final Durability durability)
 			throws IOException {
 		super.prePut(e, put, edit, durability);
-
-		long now = EnvironmentEdgeManager.currentTime();
+		long now = localQueueUtil.getNowTime();
 		byte[] byteNow = Bytes.toBytes(now);
 		Map<byte[], List<Cell>> familyMap = put.getFamilyCellMap();
 		for (Entry<byte[], List<Cell>> entry : familyMap.entrySet()) {
@@ -36,10 +31,6 @@ public class LocalIndexJusuPutObserver extends LocalIndexBasicObserver {
 
 		}
 		put.setAttribute("put_time_version", Bytes.toBytes(now));
-
-		Region region = e.getEnvironment().getRegion();
-		HRegionInfo regionInfo = e.getEnvironment().getRegionInfo();
-		String regionStartKey = Bytes.toString(regionInfo.getStartKey());
-		dataTableWithLocalIndexes.insertNewToIndexes(put, regionStartKey,region);
+		localQueueUtil.addTablePutQueueMap(put);
 	}
 }

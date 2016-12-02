@@ -42,6 +42,7 @@ public class HIndexConstantsAndUtils {
 		updateTableAttribute(conf, tableName, rawAttributeName,
 				indexOfCoprocessor, ifUpdateorRemove, value);
 	}
+	
 
 	public static void updateIndexIndicator(Configuration conf,
 			byte[] tableName, int indexOfIndexIndicator,

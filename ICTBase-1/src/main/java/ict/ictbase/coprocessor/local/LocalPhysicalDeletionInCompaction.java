@@ -15,6 +15,7 @@ import org.apache.hadoop.hbase.HTableDescriptor;
 import org.apache.hadoop.hbase.coprocessor.ObserverContext;
 import org.apache.hadoop.hbase.coprocessor.RegionCoprocessorEnvironment;
 import org.apache.hadoop.hbase.regionserver.InternalScanner;
+import org.apache.hadoop.hbase.regionserver.Region;
 import org.apache.hadoop.hbase.regionserver.ScanType;
 import org.apache.hadoop.hbase.regionserver.ScannerContext;
 import org.apache.hadoop.hbase.regionserver.Store;
@@ -32,10 +33,10 @@ public class LocalPhysicalDeletionInCompaction extends LocalIndexBasicObserver {
 			InternalScanner scanner, ScanType scanType) throws IOException {
 		InternalScanner s = super.preCompact(e, store, scanner, scanType);
 		System.out.println("*******************local InternalScanner :" + s.toString());
-		
+		Region region = e.getEnvironment().getRegion();
 		HRegionInfo hri = e.getEnvironment().getRegionInfo();
 		if (scanner instanceof StoreScanner) {
-			return new TTScannerWrapper((StoreScanner) scanner,this.dataTableWithLocalIndexes,hri);
+			return new TTScannerWrapper((StoreScanner) scanner,this.dataTableWithLocalIndexes,hri,region);
 		}
 		String errMsg = "d is not storescanner!";
 		LOG.error("TTDEBUG_ERR: " + errMsg);
@@ -46,13 +47,6 @@ public class LocalPhysicalDeletionInCompaction extends LocalIndexBasicObserver {
 	public void postCompact(ObserverContext<RegionCoprocessorEnvironment> c,
 			Store store, StoreFile resultFile) {
 		super.postCompact(c, store, resultFile);
-
-		/********************************************/
-		if (resultFile != null) {
-			System.out.println("***************resultFile:"
-					+ resultFile.toString());
-		}
-		/********************************************/
 		if (resultFile == null) {
 			return;
 		}
@@ -65,7 +59,7 @@ public class LocalPhysicalDeletionInCompaction extends LocalIndexBasicObserver {
 		LocalHTableWithIndexesDriver htablewIndexes;
 		Set<String> indexed;
 		HRegionInfo hregionInfo;
-		
+		Region region;
 		
 		/***************** here for update *********/
 		byte[] preBuffer = null;
@@ -74,12 +68,13 @@ public class LocalPhysicalDeletionInCompaction extends LocalIndexBasicObserver {
 		/***************** here for update *********/
 		
 		
-		public TTScannerWrapper(StoreScanner d, LocalHTableWithIndexesDriver h,HRegionInfo hri)
+		public TTScannerWrapper(StoreScanner d, LocalHTableWithIndexesDriver h,HRegionInfo hri,Region rgo)
 				throws IOException {
 			System.out.println("*******TTScannerWrapper  come in ");
 			this.delegate = d;
 			this.htablewIndexes = h;
 			this.hregionInfo  =  hri;
+			this.region = rgo;
 			
 			HTableDescriptor dataTableDesc = this.htablewIndexes
 					.getTableDescriptor();
@@ -157,7 +152,7 @@ public class LocalPhysicalDeletionInCompaction extends LocalIndexBasicObserver {
 						System.out.println("***********regionStartKey: "+regionStartKey);
 						
 						this.htablewIndexes.deleteFromIndex(regionStartKey,indexedColumnFamily, indexedColumnName,
-                        		CellUtil.cloneValue(kv), CellUtil.cloneRow(kv));
+                        		CellUtil.cloneValue(kv), CellUtil.cloneRow(kv),region);
 					}
 				}else{
 					System.out.println("********preBuffer is null ");

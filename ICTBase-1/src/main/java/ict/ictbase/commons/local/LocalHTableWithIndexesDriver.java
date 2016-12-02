@@ -9,7 +9,9 @@ import java.util.Map;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HTableDescriptor;
+import org.apache.hadoop.hbase.client.Delete;
 import org.apache.hadoop.hbase.client.HTable;
+import org.apache.hadoop.hbase.regionserver.Region;
 import org.apache.hadoop.hbase.util.Bytes;
 
 public class LocalHTableWithIndexesDriver extends HTable {
@@ -78,22 +80,26 @@ public class LocalHTableWithIndexesDriver extends HTable {
     
 
 	public void putToIndex(String regionStartKey,byte[] columnFamily, byte[] columnName,
-			byte[] dataValue, byte[] dataKey) throws IOException {
-		HTable indexTable = getIndexTable(columnFamily, columnName);
-		System.out.println("****************putToIndex indexTable.getTableName() :"+Bytes.toString(indexTable.getTableName()));
-		policyToMaterializeIndex.putToIndex(indexTable,regionStartKey,columnFamily,columnName, dataValue, dataKey);
+			byte[] dataValue, byte[] dataKey,Region region) throws IOException {
+		policyToMaterializeIndex.putToIndex(region,regionStartKey,columnFamily,columnName, dataValue, dataKey);
 	}
 	
 	
 	
-    public void deleteFromIndex(String regionStartKey,byte[] columnFamily, byte[] columnName,
-			byte[] dataValue, byte[] dataKey) throws IOException {
+    public boolean deleteFromIndex(String regionStartKey,byte[] columnFamily, byte[] columnName,
+			byte[] dataValue, byte[] dataKey,Region region) throws IOException {
     	System.out.println("****************deleteFromIndex:  "+Bytes.toString(columnFamily)+"\t"+Bytes.toString(columnName)+"\t"+
     			Bytes.toString(dataValue)+"\t"+Bytes.toString(dataKey));
-        HTable indexTable = getIndexTable(columnFamily, columnName);
-        policyToMaterializeIndex.deleteFromIndex(indexTable,regionStartKey,columnFamily ,columnName,dataValue,dataKey);
+        return policyToMaterializeIndex.deleteFromIndex(region,regionStartKey,columnFamily ,columnName,dataValue,dataKey);
     } 
 	
+    
+    public void deleteFromBaseTable (Region region,byte [] dataKey,long ts) throws IOException{
+    	Delete delete = new Delete(dataKey,ts);
+    	region.delete(delete);
+    }
+    
+    
     /**
 	@para, valueStop is exclusive!
     */

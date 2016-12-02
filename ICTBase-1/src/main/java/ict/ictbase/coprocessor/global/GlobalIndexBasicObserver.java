@@ -2,7 +2,7 @@ package ict.ictbase.coprocessor.global;
 
 import ict.ictbase.commons.global.GlobalHTableUpdateIndexByPut;
 import ict.ictbase.coprocessor.LoggedObserver;
-import ict.ictbase.util.QueueUtil;
+import ict.ictbase.util.global.GlobalQueueUtil;
 
 import java.io.IOException;
 import java.util.List;
@@ -28,7 +28,7 @@ public class GlobalIndexBasicObserver extends LoggedObserver {
 
     
     protected GlobalHTableUpdateIndexByPut dataTableWithIndexes = null;
-    protected QueueUtil queueUtil = null;
+    protected GlobalQueueUtil queueUtil = null;
     
     private void tryInitialize(HTableDescriptor desc) throws IOException {
         if(initialized == false) {
@@ -36,7 +36,7 @@ public class GlobalIndexBasicObserver extends LoggedObserver {
                 if(initialized == false) {
                     Configuration conf = HBaseConfiguration.create();
                     dataTableWithIndexes = new GlobalHTableUpdateIndexByPut(conf, desc.getTableName().getName()); //this will make copy of data table instance.
-                    queueUtil = new QueueUtil(dataTableWithIndexes);
+                    queueUtil = new GlobalQueueUtil(dataTableWithIndexes);
                     initialized = true;
                 }
             }

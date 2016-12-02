@@ -12,6 +12,7 @@ import org.apache.hadoop.hbase.HTableDescriptor;
 import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Result;
+import org.apache.hadoop.hbase.regionserver.Region;
 import org.apache.hadoop.hbase.util.Bytes;
 
 public class LocalHTableUpdateIndexByPut extends LocalHTableWithIndexesDriver {
@@ -24,18 +25,18 @@ public class LocalHTableUpdateIndexByPut extends LocalHTableWithIndexesDriver {
 	final static private int READ_BASE = 1;
 	final static private int DELETE_INDEX = 2;
 
-	public void insertNewToIndexes(Put put, String regionStartKey)
+	public void insertNewToIndexes(Put put, String regionStartKey,Region region)
 			throws IOException {
-		internalPrimitivePerPut(put, INSERT_INDEX, null, regionStartKey);
+		internalPrimitivePerPut(put, INSERT_INDEX, null, regionStartKey,region);
 	}
 	
-    public void readBaseAndDeleteOld(Put put,String regionStartKey) throws IOException {
-        Result readBaseResult = internalPrimitivePerPut(put, READ_BASE, null,regionStartKey);
-        internalPrimitivePerPut(put, DELETE_INDEX, readBaseResult,regionStartKey);
+    public void readBaseAndDeleteOld(Put put,String regionStartKey,Region region) throws IOException {
+        Result readBaseResult = internalPrimitivePerPut(put, READ_BASE, null,regionStartKey,region);
+        internalPrimitivePerPut(put, DELETE_INDEX, readBaseResult,regionStartKey,region);
     }
 
 	private Result internalPrimitivePerPut(Put put, int mode,
-			Result readResult4Delete, String regionStartKey) throws IOException {
+			Result readResult4Delete, String regionStartKey,Region region) throws IOException {
 		HTableDescriptor dataTableDesc = null;
 		try {
 			dataTableDesc = getTableDescriptor();
@@ -67,7 +68,7 @@ public class LocalHTableUpdateIndexByPut extends LocalHTableWithIndexesDriver {
 					if (mode == INSERT_INDEX) {
 						// put new to index
 						putToIndex(regionStartKey,indexedColumnFamily, indexedColumnName,
-								dataValuePerColumn, dataKey);
+								dataValuePerColumn, dataKey,region);
 					} else if (mode == READ_BASE) {
 						long maxTs = Bytes.toLong(put
 								.getAttribute("put_time_version"));
@@ -82,11 +83,19 @@ public class LocalHTableUpdateIndexByPut extends LocalHTableWithIndexesDriver {
                         	break;
                         }
                         for(Cell cell : list){
+                        	
                         	byte[] oldDataValuePerColumn  = CellUtil.cloneValue(cell);
-                        	System.out.println("************* start delete, oldDataValuePerColumn \t"+Bytes.toString(oldDataValuePerColumn));
-                            deleteFromIndex(regionStartKey,indexedColumnFamily, indexedColumnName,
-                            		oldDataValuePerColumn, dataKey);
-                            break;// only needs to remove the first value in index table
+                        	System.out.println("&&&&&&&&&&&&&&&&&&&& oldDataValuePerColumn \t"+Bytes.toString(oldDataValuePerColumn));
+                        	long ts = cell.getTimestamp();
+                        	boolean isDelete = deleteFromIndex(regionStartKey,indexedColumnFamily, indexedColumnName,
+                        			oldDataValuePerColumn, dataKey,region);
+                        	if(isDelete){
+                        		System.out.println("&&&&&&&&&&&&&&&&&&&& delete true");
+                        		deleteFromBaseTable(region,dataKey,ts);
+                        	}else{
+                        		System.out.println("&&&&&&&&&&&&&&&&&&&& delete false");
+                        	}
+                           // break;// only needs to remove the first value in index table
                         }
 					}
 				} else {
@@ -97,7 +106,7 @@ public class LocalHTableUpdateIndexByPut extends LocalHTableWithIndexesDriver {
 			}
 		}
 		if (mode == READ_BASE) {
-			Result readResultOld = this.get(get);
+			Result readResultOld = region.get(get);
 			return readResultOld;
 		} else {
 			return null;
