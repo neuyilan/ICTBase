@@ -80,11 +80,15 @@ public class LocalMaterializeIndexByCompositeRowkey implements
 				+ Bytes.toString(columnFamily) + "#"
 				+ Bytes.toString(columnName) + "#" + Bytes.toString(dataValue)
 				+ "#" + Bytes.toString(dataKey);
+//		System.out.println("********************indexRowkey:"+indexRowkey);
 		Put put2Index = new Put(Bytes.toBytes(indexRowkey));
 		put2Index.addColumn(IndexStorageFormat.INDEXTABLE_COLUMNFAMILY,
 				IndexStorageFormat.INDEXTABLE_SPACEHOLDER,
 				IndexStorageFormat.INDEXTABLE_SPACEHOLDER);
+		put2Index.setAttribute("index_put", Bytes.toBytes("1"));//is index put ,do not print the log information
 		region.put(put2Index);
+		//region.flush(true);
+//		System.out.println("******** region.toString():"+region.toString());
 	}
 
 	public boolean deleteFromIndex( Region region,String regionStartKey,byte [] columnFamily ,byte [] columnName,byte []  dataValue,byte []  dataKey) throws IOException {
@@ -98,6 +102,7 @@ public class LocalMaterializeIndexByCompositeRowkey implements
         	return false;
         }else{
         	Delete del = new Delete(Bytes.toBytes(indexRowkey));
+        	del.addColumn(IndexStorageFormat.INDEXTABLE_COLUMNFAMILY, IndexStorageFormat.INDEXTABLE_SPACEHOLDER);
              //del.setTimestamp(timestamp);
             region.delete(del);
         }

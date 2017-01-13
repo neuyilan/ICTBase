@@ -88,8 +88,8 @@ public class LocalHTableWithIndexesDriver extends HTable {
 	
     public boolean deleteFromIndex(String regionStartKey,byte[] columnFamily, byte[] columnName,
 			byte[] dataValue, byte[] dataKey,Region region) throws IOException {
-    	System.out.println("****************deleteFromIndex:  "+Bytes.toString(columnFamily)+"\t"+Bytes.toString(columnName)+"\t"+
-    			Bytes.toString(dataValue)+"\t"+Bytes.toString(dataKey));
+//    	System.out.println("****************deleteFromIndex:  "+Bytes.toString(columnFamily)+"\t"+Bytes.toString(columnName)+"\t"+
+//    			Bytes.toString(dataValue)+"\t"+Bytes.toString(dataKey));
         return policyToMaterializeIndex.deleteFromIndex(region,regionStartKey,columnFamily ,columnName,dataValue,dataKey);
     } 
 	

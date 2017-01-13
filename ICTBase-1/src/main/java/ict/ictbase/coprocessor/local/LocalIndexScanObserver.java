@@ -21,6 +21,8 @@ import org.apache.hadoop.hbase.regionserver.InternalScanner;
 import org.apache.hadoop.hbase.regionserver.Region;
 import org.apache.hadoop.hbase.regionserver.RegionScanner;
 import org.apache.hadoop.hbase.util.Bytes;
+import org.apache.hadoop.hbase.util.EnvironmentEdgeManager;
+import org.apache.hadoop.hbase.util.IncrementingEnvironmentEdge;
 
 public class LocalIndexScanObserver extends LocalIndexBasicObserver {
 
@@ -29,34 +31,41 @@ public class LocalIndexScanObserver extends LocalIndexBasicObserver {
 	static final public String SCAN_START_VALUE = "scan_start_value";
 	static final public String SCAN_STOP_VALUE = "scan_stop_value";
 
-	@Override
-	public boolean preScannerNext(
-			final ObserverContext<RegionCoprocessorEnvironment> e,
-			final InternalScanner s, final List<Result> results,
-			final int limit, final boolean hasMore) throws IOException {
-		super.preScannerNext(e, s, results, limit, hasMore);
-		HRegionInfo hreginInfo = e.getEnvironment().getRegionInfo();
-		System.out.println("********** hreginInfo.getStartKey: "
-				+ Bytes.toString(hreginInfo.getStartKey()));
-		for (Result r : results) {
-			for (Cell cell : r.rawCells()) {
-				System.out
-						.println(String
-								.format("pre row:%s,family:%s,qualifier:%s,value:%s,timestamp:%s",
-										Bytes.toString(CellUtil.cloneRow(cell)),
-										Bytes.toString(CellUtil
-												.cloneFamily(cell)), Bytes
-												.toString(CellUtil
-														.cloneQualifier(cell)),
-										Bytes.toString(CellUtil
-												.cloneValue(cell)), cell
-												.getTimestamp()));
-			}
-		}
-
-		return hasMore;
-
-	}
+	
+	TableName tableName = null;//e.getEnvironment().getRegionInfo().getTable();
+	Configuration conf = null;//e.getEnvironment().getConfiguration();
+	Region region = null;//e.getEnvironment().getRegion();
+	HRegionInfo hregionInfo = null;// = e.getEnvironment().getRegionInfo();
+	
+	
+//	@Override
+//	public boolean preScannerNext(
+//			final ObserverContext<RegionCoprocessorEnvironment> e,
+//			final InternalScanner s, final List<Result> results,
+//			final int limit, final boolean hasMore) throws IOException {
+//		super.preScannerNext(e, s, results, limit, hasMore);
+//		HRegionInfo hreginInfo = e.getEnvironment().getRegionInfo();
+//		System.out.println("********** hreginInfo.getStartKey: "
+//				+ Bytes.toString(hreginInfo.getStartKey()));
+//		for (Result r : results) {
+//			for (Cell cell : r.rawCells()) {
+//				System.out
+//						.println(String
+//								.format("pre row:%s,family:%s,qualifier:%s,value:%s,timestamp:%s",
+//										Bytes.toString(CellUtil.cloneRow(cell)),
+//										Bytes.toString(CellUtil
+//												.cloneFamily(cell)), Bytes
+//												.toString(CellUtil
+//														.cloneQualifier(cell)),
+//										Bytes.toString(CellUtil
+//												.cloneValue(cell)), cell
+//												.getTimestamp()));
+//			}
+//		}
+//
+//		return hasMore;
+//
+//	}
 
 	@Override
 	public boolean postScannerNext(
@@ -65,69 +74,61 @@ public class LocalIndexScanObserver extends LocalIndexBasicObserver {
 			final int limit, final boolean hasMore) throws IOException {
 		super.postScannerNext(e, s, results, limit, hasMore);
 
-		TableName tableName = e.getEnvironment().getRegionInfo().getTable();
-		Configuration conf = e.getEnvironment().getConfiguration();
-		Region region = e.getEnvironment().getRegion();
+		tableName = e.getEnvironment().getRegionInfo().getTable();
+		conf = e.getEnvironment().getConfiguration();
+		region = e.getEnvironment().getRegion();
 
-		List<Result> retResultList = new ArrayList<Result>();
-		Result tmpResult = null;
-		for (Result r : results) {
-			for (Cell cell : r.rawCells()) {
-				System.out
-						.println(String
-								.format("post row:%s,family:%s,qualifier:%s,value:%s,timestamp:%s",
-										Bytes.toString(CellUtil.cloneRow(cell)),
-										Bytes.toString(CellUtil
-												.cloneFamily(cell)), Bytes
-												.toString(CellUtil
-														.cloneQualifier(cell)),
-										Bytes.toString(CellUtil
-												.cloneValue(cell)), cell
-												.getTimestamp()));
-
-				String tmpRowKey = Bytes.toString(CellUtil.cloneRow(cell));
-				String arr[] = tmpRowKey.split("#");
-				String rowKey = arr[arr.length - 1];
-				tmpResult = this.getResultFromDataTable(conf, tableName,
-						rowKey, region);
-				if (tmpResult != null) {
-					retResultList.add(tmpResult);
+//		long attributeValue = Long.valueOf(e.getEnvironment().getConfiguration().get("scan_time_version"));
+		
+		long attributeValue = Bytes.toLong(s.getScan().getAttribute(
+				"scan_time_version"));
+		
+		if(results==null){
+			System.out.println("b scan: "+ attributeValue);
+		}else if(results.isEmpty()){
+			System.out.println("b scan: "+ attributeValue);
+		} else{
+			List<Result> retResultList = new ArrayList<Result>();
+			Result tmpResult = null;
+			for (Result r : results) {
+				for (Cell cell : r.rawCells()) {
+					String tmpRowKey = Bytes.toString(CellUtil.cloneRow(cell));
+					String arr[] = tmpRowKey.split("#");
+					String rowKey = arr[arr.length - 1];
+					tmpResult = this.getResultFromDataTable(conf, tableName,
+							rowKey, region,attributeValue);
+					if (tmpResult != null) {
+						retResultList.add(tmpResult);
+					}
 				}
 			}
+			results.clear();
+			results.addAll(retResultList);
 		}
-		results.clear();
-		results.addAll(retResultList);
 		return hasMore;
 
 	}
 
 	public Result getResultFromDataTable(Configuration conf,
-			TableName tableName, String rowKey, Region region) {
-		// Connection con;
-		// Table dataTable;
+			TableName tableName, String rowKey, Region region,long attributeValue) {
 		Result result = null;
 		try {
-			// con = ConnectionFactory.createConnection(conf);
-			// dataTable = con.getTable(tableName);
-
 			Get get = new Get(Bytes.toBytes(rowKey));
+			get.setAttribute("get_time_version", Bytes.toBytes(attributeValue));
 			result = region.get(get);
-			// result = dataTable.get(get);
-
-			for (Cell cell : result.rawCells()) {
-				System.out
-						.println(String
-								.format("getResultFromDataTable row:%s,family:%s,qualifier:%s,value:%s,timestamp:%s",
-										Bytes.toString(CellUtil.cloneRow(cell)),
-										Bytes.toString(CellUtil
-												.cloneFamily(cell)), Bytes
-												.toString(CellUtil
-														.cloneQualifier(cell)),
-										Bytes.toString(CellUtil
-												.cloneValue(cell)), cell
-												.getTimestamp()));
-			}
-
+//			for (Cell cell : result.rawCells()) {
+//				System.out
+//				.println(String
+//						.format("pre row:%s,family:%s,qualifier:%s,value:%s,timestamp:%s",
+//								Bytes.toString(CellUtil.cloneRow(cell)),
+//								Bytes.toString(CellUtil
+//										.cloneFamily(cell)), Bytes
+//										.toString(CellUtil
+//												.cloneQualifier(cell)),
+//								Bytes.toString(CellUtil
+//										.cloneValue(cell)), cell
+//										.getTimestamp()));
+//			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -139,7 +140,7 @@ public class LocalIndexScanObserver extends LocalIndexBasicObserver {
 			final ObserverContext<RegionCoprocessorEnvironment> e,
 			final Scan scan, final RegionScanner s) throws IOException {
 
-		HRegionInfo hregionInfo = e.getEnvironment().getRegionInfo();
+		hregionInfo = e.getEnvironment().getRegionInfo();
 		String regionStartKey = Bytes.toString(hregionInfo.getStartKey());
 
 		String startValue = Bytes.toString(scan.getAttribute(SCAN_START_VALUE));
@@ -151,7 +152,7 @@ public class LocalIndexScanObserver extends LocalIndexBasicObserver {
 
 		String startRow = regionStartKey + "#" + family + "#" + qualifier + "#"
 				+ startValue + "#";
-		System.out.println("*************** startRow: " + startRow);
+//		System.out.println("*************** startRow: " + startRow);
 
 		scan.setStartRow(Bytes.toBytes(startRow));
 
@@ -164,9 +165,45 @@ public class LocalIndexScanObserver extends LocalIndexBasicObserver {
 					+ stopValue + "#";
 		}
 		scan.setStopRow(Bytes.toBytes(stopRow));
-		System.out.println("*************** stopRow: " + stopRow);
+//		System.out.println("*************** stopRow: " + stopRow);
+		
+		
+		/***********************************************************/
+//		IncrementingEnvironmentEdge IEE = new IncrementingEnvironmentEdge();
+//		long now = IEE.currentTime();
+		long now = EnvironmentEdgeManager.currentTime();
+		byte[] byteNow = Bytes.toBytes(now);
+		scan.setAttribute("scan_time_version", byteNow);
+//		e.getEnvironment().getConfiguration().set("scan_time_version", String.valueOf(now));
+		
+		System.out.println("a scan: "+ Bytes.toLong(scan.getAttribute("scan_time_version")));
+		/***********************************************************/
 		super.preScannerOpen(e, scan, s);
 		return s;
 	}
+	
+	@Override
+	public RegionScanner postScannerOpen(
+			final ObserverContext<RegionCoprocessorEnvironment> e,
+			final Scan scan, final RegionScanner s) throws IOException {
+		s.setScan(scan);
+		return s;
+	}
+	
+	@Override
+	public void postGetOp(
+			final ObserverContext<RegionCoprocessorEnvironment> e,
+			final Get get, final List<Cell> results) throws IOException {
+		/************************************************************/
+		if (get.getAttribute("get_time_version") == null) {
+			// do nothing
+		} else {
+			System.out
+					.println("b scan: "
+							+ Bytes.toLong(get.getAttribute("get_time_version")));
+		}
 
+		/************************************************************/
+	}
+	
 }

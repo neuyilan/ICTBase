@@ -31,31 +31,32 @@ public class LocalQueueUtil{
 			tablePutsQueue = new LinkedBlockingQueue<Put>();
 			this.dataTableWithLocalIndexes=DTWithIndexes;
 //			System.out.println("********* initialized ==false");
-			IEE = new IncrementingEnvironmentEdge();
+//			IEE = new IncrementingEnvironmentEdge();
 			call = new SyncRepairIndexCallable();
-			
+			executor.submit(call);
 			this.startKey = startKey;
 			this.region = region;
 		}
 	}
 
-	public long getNowTime(){
-		return IEE.currentTime();
-	}
+//	public long getNowTime(){
+//		return IEE.currentTime();
+//	}
 	
 	public void addTablePutQueueMap(Put put) {
 		tablePutsQueue.add(put);
-		executor.submit(call);
+//		executor.submit(call);
 	}
 
 	
 	class SyncRepairIndexCallable implements Callable<Void> {
 
 		public Void call() throws Exception {
-			tempPut = tablePutsQueue.take();
-			dataTableWithLocalIndexes.readBaseAndDeleteOld(tempPut,startKey,region);
-			dataTableWithLocalIndexes.insertNewToIndexes(tempPut,startKey,region);
-			return null;
+			while(true){
+				tempPut = tablePutsQueue.take();
+				dataTableWithLocalIndexes.readBaseAndDeleteOld(tempPut,startKey,region);
+//				dataTableWithLocalIndexes.insertNewToIndexes(tempPut,startKey,region);
+			}
 		}
 	}
 

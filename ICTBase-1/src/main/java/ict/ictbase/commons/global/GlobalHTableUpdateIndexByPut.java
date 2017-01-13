@@ -64,19 +64,18 @@ public class GlobalHTableUpdateIndexByPut extends GlobalHTableWithIndexesDriver 
                         Result readResultOld = readResult4Delete;
                         List<Cell> list = readResultOld.listCells();
                         if(list ==null){
-                        	System.out.println("%%%%%%%%%%%%%%%%% list is null");
                         	break;
                         }
                         for(Cell cell : list){
                         	byte[] oldDataValuePerColumn  = CellUtil.cloneValue(cell);
-                        	System.out.println("&&&&&&&&&&&&&&&&&&&& oldDataValuePerColumn \t"+Bytes.toString(oldDataValuePerColumn));
+//                        	System.out.println("&&&&&&&&&&&&&&&&&&&& oldDataValuePerColumn \t+"+Bytes.toString(oldDataValuePerColumn));
                         	long ts = cell.getTimestamp();
                         	boolean isDelete = deleteFromIndex(indexedColumnFamily, indexedColumnName, oldDataValuePerColumn, dataKey);
                         	if(isDelete){
-                        		System.out.println("&&&&&&&&&&&&&&&&&&&& delete true");
+//                        		System.out.println("&&&&&&&&&&&&&&&&&&&& delete true");
                         		deleteFromBaseTable(dataKey,ts);
                         	}else{
-                        		System.out.println("&&&&&&&&&&&&&&&&&&&& delete false");
+//                        		System.out.println("&&&&&&&&&&&&&&&&&&&& delete false");
                         	}
                            // break;// only needs to remove the first value in index table
                         }
@@ -98,11 +97,13 @@ public class GlobalHTableUpdateIndexByPut extends GlobalHTableWithIndexesDriver 
 
     public void insertNewToIndexes(Put put) throws IOException {
         internalPrimitivePerPut(put, INSERT_INDEX, null);
+        System.out.println("b put: "+Bytes.toLong(put.getAttribute("put_time_version")));
     }
 
     public void readBaseAndDeleteOld(Put put) throws IOException {
         Result readBaseResult = internalPrimitivePerPut(put, READ_BASE, null);
         internalPrimitivePerPut(put, DELETE_INDEX, readBaseResult);
+//        System.out.println("b put: "+Bytes.toLong(put.getAttribute("put_time_version")));
     }
 
 //TOREMOVE does it belong to HTableWithIndexesDriver?

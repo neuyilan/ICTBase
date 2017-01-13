@@ -27,12 +27,24 @@ public class LocalHTableUpdateIndexByPut extends LocalHTableWithIndexesDriver {
 
 	public void insertNewToIndexes(Put put, String regionStartKey,Region region)
 			throws IOException {
+//		System.out.println("******start insert inedx ms:"+System.currentTimeMillis());
 		internalPrimitivePerPut(put, INSERT_INDEX, null, regionStartKey,region);
+//		System.out.println("******end insert inedx ms:"+System.currentTimeMillis());
+		
+//		if(put.getAttribute("index_put")==null){
+//			System.out.println("b put: "+Bytes.toLong(put.getAttribute("put_time_version")));
+//		}
 	}
 	
     public void readBaseAndDeleteOld(Put put,String regionStartKey,Region region) throws IOException {
+//    	System.out.println("******start read read ms:"+System.currentTimeMillis());
         Result readBaseResult = internalPrimitivePerPut(put, READ_BASE, null,regionStartKey,region);
+//        System.out.println("******end  read read(start delete) ms:"+System.currentTimeMillis());
         internalPrimitivePerPut(put, DELETE_INDEX, readBaseResult,regionStartKey,region);
+//        System.out.println("******end  delete read ms:"+System.currentTimeMillis());
+        if(put.getAttribute("index_put")==null){
+			System.out.println("b put: "+Bytes.toLong(put.getAttribute("put_time_version")));
+		}
     }
 
 	private Result internalPrimitivePerPut(Put put, int mode,
@@ -85,17 +97,18 @@ public class LocalHTableUpdateIndexByPut extends LocalHTableWithIndexesDriver {
                         for(Cell cell : list){
                         	
                         	byte[] oldDataValuePerColumn  = CellUtil.cloneValue(cell);
-                        	System.out.println("&&&&&&&&&&&&&&&&&&&& oldDataValuePerColumn \t"+Bytes.toString(oldDataValuePerColumn));
+                        	
+//                        	System.out.println("&&&&&&&&&&&&&&&&&&&& oldDataValuePerColumn \t,cell.getTimestamp()"+Bytes.toString(oldDataValuePerColumn)+","+cell.getTimestamp());
                         	long ts = cell.getTimestamp();
                         	boolean isDelete = deleteFromIndex(regionStartKey,indexedColumnFamily, indexedColumnName,
                         			oldDataValuePerColumn, dataKey,region);
                         	if(isDelete){
-                        		System.out.println("&&&&&&&&&&&&&&&&&&&& delete true");
+//                        		System.out.println("&&&&&&&&&&&&&&&&&&&& delete true");
                         		deleteFromBaseTable(region,dataKey,ts);
                         	}else{
-                        		System.out.println("&&&&&&&&&&&&&&&&&&&& delete false");
+//                        		System.out.println("&&&&&&&&&&&&&&&&&&&& delete false");
                         	}
-                           // break;// only needs to remove the first value in index table
+                            break;// only needs to remove the first value in index table
                         }
 					}
 				} else {

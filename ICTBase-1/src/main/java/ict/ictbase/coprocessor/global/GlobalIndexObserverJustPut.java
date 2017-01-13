@@ -7,6 +7,7 @@ import java.util.Map.Entry;
 import org.apache.hadoop.hbase.Cell;
 import org.apache.hadoop.hbase.CellUtil;
 import org.apache.hadoop.hbase.client.Durability;
+import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.coprocessor.ObserverContext;
 import org.apache.hadoop.hbase.coprocessor.RegionCoprocessorEnvironment;
@@ -29,7 +30,34 @@ public class GlobalIndexObserverJustPut extends GlobalIndexBasicObserver {
 			}
 
 		}
-		put.setAttribute("put_time_version", Bytes.toBytes(now));
-        dataTableWithIndexes.insertNewToIndexes(put);
+		put.setAttribute("put_time_version", byteNow);
+		/************************************************************/
+		System.out
+				.println("a put: "
+						+ Bytes.toLong(put.getAttribute("put_time_version")));
+		/************************************************************/
+        
     }
+    
+	public void postPut(final ObserverContext<RegionCoprocessorEnvironment> e,
+			final Put put, final WALEdit edit, final Durability durability)
+			throws IOException {
+		dataTableWithIndexes.insertNewToIndexes(put);
+	}
+	
+	@Override
+	public void postGetOp(
+			final ObserverContext<RegionCoprocessorEnvironment> e,
+			final Get get, final List<Cell> results) throws IOException {
+		/************************************************************/
+		if (get.getAttribute("get_time_version") == null) {
+			// do nothing
+		} else {
+			System.out
+					.println("b scan: "
+							+ Bytes.toLong(get.getAttribute("get_time_version")));
+		}
+
+		/************************************************************/
+	}
 }

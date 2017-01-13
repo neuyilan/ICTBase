@@ -26,6 +26,7 @@ import org.apache.hadoop.hbase.regionserver.Region;
 import org.apache.hadoop.hbase.regionserver.RegionScanner;
 import org.apache.hadoop.hbase.regionserver.ScanType;
 import org.apache.hadoop.hbase.regionserver.Store;
+import org.apache.hadoop.hbase.regionserver.StoreFile;
 import org.apache.hadoop.hbase.regionserver.wal.WALEdit;
 import org.apache.hadoop.hbase.util.Bytes;
 
@@ -34,6 +35,7 @@ public class LocalIndexBasicObserver extends LoggedObserver {
 	private boolean initializedForPut;
 	protected LocalHTableUpdateIndexByPut dataTableWithLocalIndexes = null;
 	protected LocalQueueUtil localQueueUtil = null;
+
 	private void tryInitialize(HTableDescriptor desc) throws IOException {
 		if (initialized == false) {
 			synchronized (this) {
@@ -46,16 +48,17 @@ public class LocalIndexBasicObserver extends LoggedObserver {
 			}
 		}
 	}
-	
-	
-	private void tryInitializeForPut(HTableDescriptor desc,String startKey,Region region) throws IOException {
+
+	private void tryInitializeForPut(HTableDescriptor desc, String startKey,
+			Region region) throws IOException {
 		if (initializedForPut == false) {
 			synchronized (this) {
 				if (initializedForPut == false) {
 					Configuration conf = HBaseConfiguration.create();
 					dataTableWithLocalIndexes = new LocalHTableUpdateIndexByPut(
 							conf, desc.getTableName().getName());
-					localQueueUtil = new LocalQueueUtil(dataTableWithLocalIndexes,startKey,region);
+					localQueueUtil = new LocalQueueUtil(
+							dataTableWithLocalIndexes, startKey, region);
 					initializedForPut = true;
 				}
 			}
@@ -78,7 +81,8 @@ public class LocalIndexBasicObserver extends LoggedObserver {
 		Region region = e.getEnvironment().getRegion();
 		HRegionInfo regionInfo = e.getEnvironment().getRegionInfo();
 		String startKey = Bytes.toString(regionInfo.getStartKey());
-		tryInitializeForPut(e.getEnvironment().getRegion().getTableDesc(),startKey,region);
+		tryInitializeForPut(e.getEnvironment().getRegion().getTableDesc(),
+				startKey, region);
 	}
 
 	@Override
@@ -139,6 +143,22 @@ public class LocalIndexBasicObserver extends LoggedObserver {
 			final Scan scan, final RegionScanner s) throws IOException {
 		super.preScannerOpen(e, scan, s);
 		return s;
+	}
+
+	@Override
+	public InternalScanner preFlush(
+			ObserverContext<RegionCoprocessorEnvironment> e, Store store,
+			InternalScanner scanner) throws IOException {
+		tryInitialize(e.getEnvironment().getRegion().getTableDesc());
+		super.preFlush(e, store, scanner);
+		return scanner;
+	}
+
+	@Override
+	public void postFlush(ObserverContext<RegionCoprocessorEnvironment> e,
+			Store store, StoreFile resultFile) throws IOException {
+		tryInitialize(e.getEnvironment().getRegion().getTableDesc());
+		super.postFlush(e, store, resultFile);
 	}
 
 	@Override

@@ -27,9 +27,9 @@ import org.apache.hadoop.hbase.filter.SingleColumnValueFilter;
 import org.apache.hadoop.hbase.util.Bytes;
 
 public class LocalPutSyncDelete {
-	private static String testTableName = "test_local_sync_delete";
+	private static String testTableName = "testtable";
 	private static String columnFamily = "cf";
-	private static String indexedColumnName = "country";
+	private static String indexedColumnName = "field0";
 	private static String INDEXTABLE_COLUMNFAMILY = "INDEX_CF";
 	
 	private static Configuration conf;
@@ -64,7 +64,7 @@ public class LocalPutSyncDelete {
 				"ict.ictbase.coprocessor.local.LocalIndexBaselineObserver");
 		
 		HIndexConstantsAndUtils.updateCoprocessor(conf, htable.getTableName(),
-				coprocessorIndex++, false, coprocessorJarLoc,
+				coprocessorIndex++, true, coprocessorJarLoc,
 				"ict.ictbase.coprocessor.local.LocalIndexScanObserver");
 	}
 
@@ -179,14 +179,14 @@ public class LocalPutSyncDelete {
 		initTables(conf, testTableName, columnFamily, indexedColumnName,startKeyStr,endKeyStr,numberOfRegions);
 		htable = new LocalHTableGetByIndex(conf, Bytes.toBytes(testTableName));
 		initCoProcessors(conf, coprocessorJarLoc, htable);
-		loadData2();
+//		loadData2();
 		
 //		loadAndDeleteData();
 		
 //		getResultFromScan(htable);
 		
-		List<String> res = htable.getByIndex(Bytes.toBytes(columnFamily),
-				Bytes.toBytes(indexedColumnName), Bytes.toBytes("111"));
+//		List<String> res = htable.getByIndex(Bytes.toBytes(columnFamily),
+//				Bytes.toBytes(indexedColumnName), Bytes.toBytes("111"));
 //		assert (res != null && res.size() != 0);
 //		for(int i =0;i<res.size();i++){
 //			System.out.println("Result is " + res.get(i));

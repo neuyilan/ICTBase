@@ -17,7 +17,7 @@ import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.util.Bytes;
 
-public class LocalPutAsyncDelete2 {
+public class LocalFlushAsync {
 	private static String testTableName = "testtable";
 	private static String columnFamily = "cf";
 	private static String indexedColumnName = "field0";
@@ -52,18 +52,15 @@ public class LocalPutAsyncDelete2 {
 		int coprocessorIndex = 1;
 		HIndexConstantsAndUtils.updateCoprocessor(conf, htable.getTableName(),
 				coprocessorIndex++, true, coprocessorJarLoc,
-				"ict.ictbase.coprocessor.local.LocalIndexObserverAsyncMaintain2");
-		
-		HIndexConstantsAndUtils.updateCoprocessor(conf, htable.getTableName(),
-				coprocessorIndex++, true, coprocessorJarLoc,
-				"ict.ictbase.coprocessor.local.LocalIndexScanObserver");
+				"ict.ictbase.coprocessor.local.LocalIndexFlushObserver");
 	}
 
 	public static void loadData() throws IOException {
 		// load data
-		String rowkeyStr = "global_key";
+		String rowkeyStr = "local_flush";
 		byte[] rowKey = Bytes.toBytes(rowkeyStr);
-		for (int i = 0; i < 100; i++) {
+		for (int i = 100; i < 200; i++) {
+//			Put p = new Put(Bytes.toBytes(rowkeyStr+i));
 			Put p = new Put(rowKey);
 			long value = i;
 			
@@ -85,10 +82,15 @@ public class LocalPutAsyncDelete2 {
 			rowKey = Bytes.toBytes(tmpStr);
 			Put p = new Put(rowKey);
 			long ts = 100+i;
+//			p.addColumn(Bytes.toBytes(columnFamily),
+//					Bytes.toBytes(indexedColumnName), ts,
+//					Bytes.toBytes("value"+ts));
+//			p.setAttribute("put_time_version", Bytes.toBytes(ts));
+			
+			
 			p.addColumn(Bytes.toBytes(columnFamily),
-					Bytes.toBytes(indexedColumnName), ts,
+					Bytes.toBytes(indexedColumnName),
 					Bytes.toBytes("value"+ts));
-			p.setAttribute("put_time_version", Bytes.toBytes(ts));
 			htable.put(p);
 		}
 	}
@@ -114,10 +116,12 @@ public class LocalPutAsyncDelete2 {
 			indexedColumnName = args[2];
 
 		}
-		initTables(conf, testTableName, columnFamily, indexedColumnName);
+//		initTables(conf, testTableName, columnFamily, indexedColumnName);
+//		htable = new LocalHTableGetByIndex(conf, Bytes.toBytes(testTableName));
+//		initCoProcessors(conf, coprocessorJarLoc, htable);
+		
 		htable = new LocalHTableGetByIndex(conf, Bytes.toBytes(testTableName));
-		initCoProcessors(conf, coprocessorJarLoc, htable);
-//		loadData();
+		loadData();
 
 		
 //		loadData2MutilRegion();

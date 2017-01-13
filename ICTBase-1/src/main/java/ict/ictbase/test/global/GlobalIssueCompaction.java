@@ -55,9 +55,9 @@ public class GlobalIssueCompaction {
 	
 	private static String coprocessorJarLoc = "hdfs://data8:9000/jar/ICTBase-1-0.0.1-SNAPSHOT.jar";
 	
-	static String testTableName = "table_compact";
+	static String testTableName = "testtable";
 	static String columnFamily = "cf";
-	static String indexedColumnName = "country";
+	static String indexedColumnName = "field0";
 	static byte[] rowKey = Bytes.toBytes("g_key_compact");
 	
 	
@@ -72,7 +72,7 @@ public class GlobalIssueCompaction {
 	
 
 	static void initTables(Configuration conf, String testTableName,
-			String columnFamily, String indexedColumnName) throws IOException{
+			String columnFamily, String indexedColumnName) throws Exception{
 		Connection con = ConnectionFactory.createConnection(conf);
 		Admin admin = con.getAdmin();
 		TableName tn = TableName.valueOf(testTableName);
@@ -101,6 +101,8 @@ public class GlobalIssueCompaction {
 		
 		HIndexConstantsAndUtils.createAndConfigIndexTable(conf, indexTableName,
 				Bytes.toBytes(columnFamily));
+		
+		initIndexTableCoProcessors(conf,coprocessorJarLoc,indexTableName);
 	}
 
 	static void loadData() throws IOException {
@@ -146,6 +148,16 @@ public class GlobalIssueCompaction {
 				"ict.ictbase.coprocessor.global.GlobalIndexObserverJustPut");
 	}
 
+	
+	public static void initIndexTableCoProcessors(Configuration conf,
+			String coprocessorJarLoc, byte[] htable) throws Exception {
+		int coprocessorIndex = 1;
+		HIndexConstantsAndUtils.updateCoprocessor(conf, htable,
+				coprocessorIndex++, true, coprocessorJarLoc,
+				"ict.ictbase.coprocessor.global.GlobalIndexScanObserver");
+	}
+	
+	
 	public static void issueMajorCompactionAsynchronously() {
 		try {
 			Connection con = ConnectionFactory.createConnection(conf);
@@ -218,7 +230,7 @@ public class GlobalIssueCompaction {
 		htable = new GlobalHTableGetByIndex(conf, Bytes.toBytes(testTableName));
 		initCoProcessors(conf, coprocessorJarLoc, htable);
 //		loadData();
-		loadData2MutilRegion();
+//		loadData2MutilRegion();
 //		deleteTest();
 		
 		

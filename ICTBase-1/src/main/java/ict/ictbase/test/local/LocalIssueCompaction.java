@@ -31,9 +31,9 @@ public class LocalIssueCompaction {
 	public static final Log LOG = LogFactory
 			.getLog(HIndexConstantsAndUtils.class);
 
-	private static String testTableName = "local_table_compact_1";
+	private static String testTableName = "testtable";
 	private static String columnFamily = "cf";
-	private static String indexedColumnName = "country";
+	private static String indexedColumnName = "field0";
 	private static String INDEXTABLE_COLUMNFAMILY = "INDEX_CF";
 
 	private static Configuration conf;
@@ -189,17 +189,17 @@ public class LocalIssueCompaction {
 
 		}
 
-//		initTables(conf, testTableName, columnFamily,indexedColumnName,startKeyStr,endKeyStr,numberOfRegions);
+		initTables(conf, testTableName, columnFamily,indexedColumnName,startKeyStr,endKeyStr,numberOfRegions);
 		htable = new LocalHTableGetByIndex(conf, Bytes.toBytes(testTableName));
-//		initCoProcessors(conf, coprocessorJarLoc, htable);
+		initCoProcessors(conf, coprocessorJarLoc, htable);
 //		loadData();
 
 //		 issueMajorCompactionAsynchronously();
 		
 		
 		
-		 List<String> res = htable.getByIndex(Bytes.toBytes(columnFamily),
-		 Bytes.toBytes(indexedColumnName), Bytes.toBytes("vb3"));
+//		 List<String> res = htable.getByIndex(Bytes.toBytes(columnFamily),
+//		 Bytes.toBytes(indexedColumnName), Bytes.toBytes("vb3"));
 
 //		scanTest();
 	}

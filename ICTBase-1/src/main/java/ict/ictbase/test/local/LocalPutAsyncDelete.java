@@ -18,9 +18,9 @@ import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.util.Bytes;
 
 public class LocalPutAsyncDelete {
-	private static String testTableName = "local_async_delete_2";
+	private static String testTableName = "testtable";
 	private static String columnFamily = "cf";
-	private static String indexedColumnName = "country";
+	private static String indexedColumnName = "field0";
 	private static Configuration conf;
 	private static String coprocessorJarLoc = "hdfs://data8:9000/jar/ICTBase-1-0.0.1-SNAPSHOT.jar";
 	private static LocalHTableGetByIndex htable;
@@ -53,14 +53,17 @@ public class LocalPutAsyncDelete {
 		HIndexConstantsAndUtils.updateCoprocessor(conf, htable.getTableName(),
 				coprocessorIndex++, true, coprocessorJarLoc,
 				"ict.ictbase.coprocessor.local.LocalIndexObserverAsyncMaintain");
-
+		
+		HIndexConstantsAndUtils.updateCoprocessor(conf, htable.getTableName(),
+				coprocessorIndex++, true, coprocessorJarLoc,
+				"ict.ictbase.coprocessor.local.LocalIndexScanObserver");
 	}
 
 	public static void loadData() throws IOException {
 		// load data
-		String rowkeyStr = "key_async";
+		String rowkeyStr = "global_key";
 		byte[] rowKey = Bytes.toBytes(rowkeyStr);
-		for (int i = 0; i < 10000; i++) {
+		for (int i = 0; i < 100; i++) {
 			Put p = new Put(rowKey);
 			long value = i;
 			
@@ -111,18 +114,18 @@ public class LocalPutAsyncDelete {
 			indexedColumnName = args[2];
 
 		}
-//		initTables(conf, testTableName, columnFamily, indexedColumnName);
+		initTables(conf, testTableName, columnFamily, indexedColumnName);
 		htable = new LocalHTableGetByIndex(conf, Bytes.toBytes(testTableName));
-//		initCoProcessors(conf, coprocessorJarLoc, htable);
-		loadData();
+		initCoProcessors(conf, coprocessorJarLoc, htable);
+//		loadData();
 
 		
 //		loadData2MutilRegion();
 		
 		// getByIndex
-		List<String> res = htable.getByIndex(Bytes.toBytes(columnFamily),
-				Bytes.toBytes(indexedColumnName), Bytes.toBytes("v10"));
-		assert (res != null && res.size() != 0);
+//		List<String> res = htable.getByIndex(Bytes.toBytes(columnFamily),
+//				Bytes.toBytes(indexedColumnName), Bytes.toBytes("v10"));
+//		assert (res != null && res.size() != 0);
 		
 	}
 }

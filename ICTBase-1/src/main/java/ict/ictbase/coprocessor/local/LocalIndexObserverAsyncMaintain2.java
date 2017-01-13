@@ -17,8 +17,7 @@ import org.apache.hadoop.hbase.regionserver.wal.WALEdit;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.hadoop.hbase.util.EnvironmentEdgeManager;
 
-public class LocalIndexJusuPutObserver extends LocalIndexBasicObserver {
-
+public class LocalIndexObserverAsyncMaintain2 extends LocalIndexBasicObserver {
 	Region region ;//= e.getEnvironment().getRegion();
 	HRegionInfo regionInfo ;//=  e.getEnvironment().getRegionInfo();
 	String regionStartKey ;//= Bytes.toString(regionInfo.getStartKey());
@@ -28,7 +27,7 @@ public class LocalIndexJusuPutObserver extends LocalIndexBasicObserver {
 			final Put put, final WALEdit edit, final Durability durability)
 			throws IOException {
 		super.prePut(e, put, edit, durability);
-
+//		long now = localQueueUtil.getNowTime();
 		long now = EnvironmentEdgeManager.currentTime();
 		byte[] byteNow = Bytes.toBytes(now);
 		Map<byte[], List<Cell>> familyMap = put.getFamilyCellMap();
@@ -37,7 +36,6 @@ public class LocalIndexJusuPutObserver extends LocalIndexBasicObserver {
 			for (Cell cell : cells) {
 				CellUtil.updateLatestStamp(cell, byteNow, 0);
 			}
-
 		}
 		put.setAttribute("put_time_version", Bytes.toBytes(now));
 		/************************************************************/
@@ -46,8 +44,8 @@ public class LocalIndexJusuPutObserver extends LocalIndexBasicObserver {
 					+ Bytes.toLong(put.getAttribute("put_time_version")));
 		}
 		/************************************************************/
+		
 	}
-	
 	
 	public void postPut(final ObserverContext<RegionCoprocessorEnvironment> e,
 			final Put put, final WALEdit edit, final Durability durability)
@@ -56,6 +54,8 @@ public class LocalIndexJusuPutObserver extends LocalIndexBasicObserver {
 		regionInfo =  e.getEnvironment().getRegionInfo();
 		regionStartKey = Bytes.toString(regionInfo.getStartKey());
 		
-		dataTableWithLocalIndexes.insertNewToIndexes(put, regionStartKey,region);
+		dataTableWithLocalIndexes.insertNewToIndexes(put,regionStartKey,region);
+		
+		localQueueUtil.addTablePutQueueMap(put);
 	}
 }

@@ -19,6 +19,9 @@ import org.apache.hadoop.hbase.util.EnvironmentEdgeManager;
 
 public class LocalIndexBaselineObserver extends LocalIndexBasicObserver{
 	
+	Region region = null;
+	HRegionInfo regionInfo = null;// e.getEnvironment().getRegionInfo();
+	String regionStartKey = null;//Bytes.toString(regionInfo.getStartKey());
 	@Override
     public void prePut(final ObserverContext<RegionCoprocessorEnvironment> e, final Put put, final WALEdit edit, final Durability durability) throws IOException {
 		super.prePut(e, put, edit, durability);
@@ -32,20 +35,24 @@ public class LocalIndexBaselineObserver extends LocalIndexBasicObserver{
 			}
 		}
 		put.setAttribute("put_time_version", Bytes.toBytes(now));
-		
-		
-		
+		/************************************************************/
+		if(put.getAttribute("index_put")==null){
+			System.out.println("a put: "
+					+ Bytes.toLong(put.getAttribute("put_time_version")));
+		}
+		/************************************************************/
     }
 	
 	public void postPut(final ObserverContext<RegionCoprocessorEnvironment> e,
 			final Put put, final WALEdit edit, final Durability durability)
 			throws IOException {
-		Region region = e.getEnvironment().getRegion();
-		HRegionInfo regionInfo =  e.getEnvironment().getRegionInfo();
-		String regionStartKey = Bytes.toString(regionInfo.getStartKey());
-		synchronized(this){
+		region = e.getEnvironment().getRegion();
+		regionInfo =  e.getEnvironment().getRegionInfo();
+		regionStartKey = Bytes.toString(regionInfo.getStartKey());
+		
+//		synchronized(this){
 			dataTableWithLocalIndexes.readBaseAndDeleteOld(put,regionStartKey,region);
 			dataTableWithLocalIndexes.insertNewToIndexes(put,regionStartKey,region);
-		}
+//		}
 	}
 }

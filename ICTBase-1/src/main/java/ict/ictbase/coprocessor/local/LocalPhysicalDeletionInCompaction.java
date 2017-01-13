@@ -12,6 +12,7 @@ import org.apache.hadoop.hbase.Cell;
 import org.apache.hadoop.hbase.CellUtil;
 import org.apache.hadoop.hbase.HRegionInfo;
 import org.apache.hadoop.hbase.HTableDescriptor;
+import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.coprocessor.ObserverContext;
 import org.apache.hadoop.hbase.coprocessor.RegionCoprocessorEnvironment;
 import org.apache.hadoop.hbase.regionserver.InternalScanner;
@@ -209,6 +210,16 @@ public class LocalPhysicalDeletionInCompaction extends LocalIndexBasicObserver {
 			/************************************************************/
 			filterKVs(results);
 			return ifDone;
+		}
+
+		public void setScan(Scan scan) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		public Scan getScan() {
+			// TODO Auto-generated method stub
+			return null;
 		}
 	}
 }

@@ -63,7 +63,7 @@ public class HIndexConstantsAndUtils {
 	 *            is of the same raw attribute name, for example 2 in
 	 *            secondary$2
 	 */
-	static void updateTableAttribute(Configuration conf, byte[] tableName,
+	public static void updateTableAttribute(Configuration conf, byte[] tableName,
 			String rawAttributeName, int indexOfAttribute,
 			boolean ifUpdateorRemove, String value) throws IOException {
 		Connection con = ConnectionFactory.createConnection(conf);
@@ -111,11 +111,11 @@ public class HIndexConstantsAndUtils {
 							+ indexedColumnNames[i]);
 		}
 		HColumnDescriptor descColFamily = new HColumnDescriptor(columnFamily);
-		// configure to set KEEP_DELETED_CELLS => 'true'
-		descColFamily.setKeepDeletedCells(KeepDeletedCells.TRUE);
-		descColFamily.setTimeToLive(HConstants.FOREVER);
-//		descColFamily.setMaxVersions(Integer.MAX_VALUE);
-		descColFamily.setMaxVersions(1);
+//		// configure to set KEEP_DELETED_CELLS => 'true'
+//		descColFamily.setKeepDeletedCells(KeepDeletedCells.TRUE);
+//		descColFamily.setTimeToLive(HConstants.FOREVER);
+////		descColFamily.setMaxVersions(Integer.MAX_VALUE);
+//		descColFamily.setMaxVersions(1);
 		desc.addFamily(descColFamily);
 		admin.createTable(desc);
 	}
@@ -134,20 +134,21 @@ public class HIndexConstantsAndUtils {
 							+ indexedColumnNames[i]);
 		}
 		HColumnDescriptor descColFamily = new HColumnDescriptor(columnFamily);
-		descColFamily.setKeepDeletedCells(KeepDeletedCells.TRUE);
-		descColFamily.setTimeToLive(HConstants.FOREVER);
-		descColFamily.setMaxVersions(Integer.MAX_VALUE);
+//		descColFamily.setKeepDeletedCells(KeepDeletedCells.TRUE);
+//		descColFamily.setTimeToLive(HConstants.FOREVER);
+		descColFamily.setMaxVersions(3);
 		desc.addFamily(descColFamily);
 		
 		HColumnDescriptor indexColFamily = new HColumnDescriptor(indexTableColumnFamily);
-		indexColFamily.setKeepDeletedCells(KeepDeletedCells.TRUE);
-		indexColFamily.setTimeToLive(HConstants.FOREVER);
-		indexColFamily.setMaxVersions(Integer.MAX_VALUE);
+//		indexColFamily.setKeepDeletedCells(KeepDeletedCells.TRUE);
+//		indexColFamily.setTimeToLive(HConstants.FOREVER);
+		indexColFamily.setMaxVersions(3);
 		desc.addFamily(indexColFamily);
 		
-		byte [] startKey = Bytes.toBytes(startKeyStr);
-		byte [] endKey = Bytes.toBytes(endKeyStr);
-		admin.createTable(desc,startKey,endKey,numberOfRegions);
+//		byte [] startKey = Bytes.toBytes(startKeyStr);
+//		byte [] endKey = Bytes.toBytes(endKeyStr);
+//		admin.createTable(desc,startKey,endKey,numberOfRegions);
+		admin.createTable(desc);
 	}
 	
 	

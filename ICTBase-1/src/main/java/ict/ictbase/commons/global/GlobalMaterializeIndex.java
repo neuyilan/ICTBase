@@ -9,7 +9,7 @@ import org.apache.hadoop.hbase.client.HTable;
 public interface GlobalMaterializeIndex {
 	
 	//global index
-    public Map<byte[], List<byte[]> > getByIndexByRange(HTable indexTable, byte[] valueStart, byte[] valueStop) throws IOException;
+    public List<String> getByIndexByRange(HTable indexTable, byte[] valueStart, byte[] valueStop) throws IOException;
     public void putToIndex(HTable indexTable, byte[] dataValue, byte[] dataKey) throws IOException;
     public boolean deleteFromIndex(HTable indexTable, byte[] dataValue, byte[] dataKey) throws IOException;
 }

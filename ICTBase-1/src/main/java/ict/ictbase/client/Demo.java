@@ -72,8 +72,5 @@ public class Demo {
 
        //getByIndex
        htable.configPolicy(GlobalHTableGetByIndex.PLY_FASTREAD);
-       List<byte[]> res = htable.getByIndex(Bytes.toBytes(columnFamily), Bytes.toBytes(indexedColumnName), Bytes.toBytes("v1"));
-       assert(res != null && res.size() != 0);
-       System.out.println("Result is " + Bytes.toString(res.get(0)));
     }
 }

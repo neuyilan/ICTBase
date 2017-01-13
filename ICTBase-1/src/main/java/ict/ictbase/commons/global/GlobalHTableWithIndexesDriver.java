@@ -82,7 +82,7 @@ public class GlobalHTableWithIndexesDriver extends HTable {
 	@para, valueStop is exclusive!
 	@return, <dataValue in range, list of dataKeys>
     */
-    protected Map<byte[], List<byte[]> > internalGetByIndexByRange(byte[] columnFamily, byte[] columnName, byte[] valueStart, byte[] valueStop) throws IOException {
+    protected List<String> internalGetByIndexByRange(byte[] columnFamily, byte[] columnName, byte[] valueStart, byte[] valueStop) throws IOException {
     	HTable indexTable = getIndexTable(columnFamily, columnName);
         return policyToMaterializeIndex.getByIndexByRange(indexTable, valueStart, valueStop);
     }
@@ -93,8 +93,8 @@ public class GlobalHTableWithIndexesDriver extends HTable {
     }
 
     public boolean deleteFromIndex(byte[] columnFamily, byte[] columnName, byte[] dataValue, byte[] dataKey) throws IOException {
-    	System.out.println("****************: global "+Bytes.toString(columnFamily)+"\t"+Bytes.toString(columnName)+"\t"+
-    			Bytes.toString(dataValue)+"\t"+Bytes.toString(dataKey));
+//    	System.out.println("****************: global "+Bytes.toString(columnFamily)+"\t"+Bytes.toString(columnName)+"\t"+
+//    			Bytes.toString(dataValue)+"\t"+Bytes.toString(dataKey));
         HTable indexTable = getIndexTable(columnFamily, columnName);
        boolean isDeleted  =  policyToMaterializeIndex.deleteFromIndex(indexTable, dataValue, dataKey);
        return isDeleted;

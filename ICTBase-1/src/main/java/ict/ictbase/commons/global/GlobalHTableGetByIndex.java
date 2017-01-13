@@ -32,28 +32,37 @@ public class GlobalHTableGetByIndex extends GlobalHTableWithIndexesDriver {
 		return policyReadIndex;
 	}
 
-	public List<byte[]> getByIndex(byte[] columnFamily, byte[] columnName,
+//	public List<byte[]> getByIndex(byte[] columnFamily, byte[] columnName,
+//			byte[] value) throws IOException {
+//		List<byte[]> rawResults = readIndexOnly(columnFamily, columnName, value);
+//		List<byte[]> datakeyToDels = new ArrayList<byte[]>();
+//		if (policyReadIndex == PLY_READCHECK) {
+//			if (rawResults != null) {
+//				for (byte[] dataRowkey : rawResults) {
+//					byte[] valueFromBase = readBase(dataRowkey, columnFamily,
+//							columnName);
+//					if (!Bytes.equals(valueFromBase, value)) {
+//						datakeyToDels.add(dataRowkey);
+//					}
+//				}
+//				rawResults.removeAll(datakeyToDels);
+//				for (byte[] datakeyToDel : datakeyToDels) {
+//					deleteFromIndex(columnFamily, columnName, value,
+//							datakeyToDel);
+//				}
+//			}
+//		}
+//		return rawResults;
+//	}
+	
+	public List<String> getByIndexData(byte[] columnFamily, byte[] columnName,
 			byte[] value) throws IOException {
-		List<byte[]> rawResults = readIndexOnly(columnFamily, columnName, value);
-		List<byte[]> datakeyToDels = new ArrayList<byte[]>();
-		if (policyReadIndex == PLY_READCHECK) {
-			if (rawResults != null) {
-				for (byte[] dataRowkey : rawResults) {
-					byte[] valueFromBase = readBase(dataRowkey, columnFamily,
-							columnName);
-					if (!Bytes.equals(valueFromBase, value)) {
-						datakeyToDels.add(dataRowkey);
-					}
-				}
-				rawResults.removeAll(datakeyToDels);
-				for (byte[] datakeyToDel : datakeyToDels) {
-					deleteFromIndex(columnFamily, columnName, value,
-							datakeyToDel);
-				}
-			}
-		}
-		return rawResults;
+		List<String> res = internalGetByIndexByRange(columnFamily,
+				columnName, value, null);
+		return res;
 	}
+	
+	
 
 	private byte[] readBase(byte[] dataRowkey, byte[] columnFamily,
 			byte[] columnName) throws IOException {
@@ -65,32 +74,35 @@ public class GlobalHTableGetByIndex extends GlobalHTableWithIndexesDriver {
 		return CellUtil.cloneValue(cell);
 	}
 
-	private List<byte[]> readIndexOnly(byte[] columnFamily, byte[] columnName,
-			byte[] value) throws IOException {
-		assert value != null;
-		Map<byte[], List<byte[]>> res = internalGetByIndexByRange(columnFamily,
-				columnName, value, null);
-		if (res == null || res.size() == 0) {
-			return null;
-		} else {
-			List<byte[]> toRet = new ArrayList<byte[]>();
-			for (Map.Entry<byte[], List<byte[]>> e : res.entrySet()) {
-				List<byte[]> keys = e.getValue();
-				for (byte[] key : keys) {
-					toRet.add(key);
-				}
-			}
-			return toRet;
-		}
-	}
-
-	public Map<byte[], List<byte[]>> getByIndexByRange(byte[] columnFamily,
-			byte[] columnName, byte[] valueStart, byte[] valueEnd)
-			throws IOException {
-		assert valueStart != null;
-		assert valueEnd != null;
-		assert Bytes.toString(valueStart).compareTo(Bytes.toString(valueEnd)) < 0; 
-		return internalGetByIndexByRange(columnFamily, columnName, valueStart,
-				Bytes.toBytes(Bytes.toString(valueEnd) + "0"));
-	}
+//	private List<byte[]> readIndexOnly(byte[] columnFamily, byte[] columnName,
+//			byte[] value) throws IOException {
+//		assert value != null;
+//		Map<byte[], List<byte[]>> res = internalGetByIndexByRange(columnFamily,
+//				columnName, value, null);
+//		if (res == null || res.size() == 0) {
+//			return null;
+//		} else {
+//			List<byte[]> toRet = new ArrayList<byte[]>();
+//			for (Map.Entry<byte[], List<byte[]>> e : res.entrySet()) {
+//				List<byte[]> keys = e.getValue();
+//				for (byte[] key : keys) {
+//					toRet.add(key);
+//				}
+//			}
+//			return toRet;
+//		}
+//	}
+//
+//	public Map<byte[], List<byte[]>> getByIndexByRange(byte[] columnFamily,
+//			byte[] columnName, byte[] valueStart, byte[] valueEnd)
+//			throws IOException {
+//		assert valueStart != null;
+//		assert valueEnd != null;
+//		assert Bytes.toString(valueStart).compareTo(Bytes.toString(valueEnd)) < 0; 
+//		return internalGetByIndexByRange(columnFamily, columnName, valueStart,
+//				Bytes.toBytes(Bytes.toString(valueEnd) + "0"));
+//	}
+	
+	
+	
 }
