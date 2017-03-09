@@ -87,25 +87,29 @@ public class LocalMaterializeIndexByCompositeRowkey implements
 				IndexStorageFormat.INDEXTABLE_SPACEHOLDER);
 		put2Index.setAttribute("index_put", Bytes.toBytes("1"));//is index put ,do not print the log information
 		region.put(put2Index);
-		//region.flush(true);
-//		System.out.println("******** region.toString():"+region.toString());
+//		System.out.println("******** in the putToIndex method in class LocalMaterializeIndexByCompositeRowkey");
 	}
 
 	public boolean deleteFromIndex( Region region,String regionStartKey,byte [] columnFamily ,byte [] columnName,byte []  dataValue,byte []  dataKey) throws IOException {
 		String indexRowkey = regionStartKey+"#"+Bytes.toString(columnFamily)+"#"+Bytes.toString(columnName)+"#"
 				+Bytes.toString(dataValue)+"#"+Bytes.toString(dataKey);
-		Get get = new Get(Bytes.toBytes(indexRowkey));
-	        
-	    Result r = region.get(get);
-	    
-	    if(r.isEmpty()){
-        	return false;
-        }else{
-        	Delete del = new Delete(Bytes.toBytes(indexRowkey));
-        	del.addColumn(IndexStorageFormat.INDEXTABLE_COLUMNFAMILY, IndexStorageFormat.INDEXTABLE_SPACEHOLDER);
-             //del.setTimestamp(timestamp);
-            region.delete(del);
-        }
+//		Get get = new Get(Bytes.toBytes(indexRowkey));
+//	        
+//	    Result r = region.get(get);
+//	    
+//	    if(r.isEmpty()){
+//        	return false;
+//        }else{
+//        	Delete del = new Delete(Bytes.toBytes(indexRowkey));
+//        	del.addColumn(IndexStorageFormat.INDEXTABLE_COLUMNFAMILY, IndexStorageFormat.INDEXTABLE_SPACEHOLDER);
+//             //del.setTimestamp(timestamp);
+//            region.delete(del);
+//        }
+//        return true;
+        
+        Delete del = new Delete(Bytes.toBytes(indexRowkey));
+    	del.addColumn(IndexStorageFormat.INDEXTABLE_COLUMNFAMILY, IndexStorageFormat.INDEXTABLE_SPACEHOLDER);
+        region.delete(del);
         return true;
 	}
 }

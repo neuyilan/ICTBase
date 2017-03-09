@@ -114,7 +114,7 @@ public class HIndexConstantsAndUtils {
 //		// configure to set KEEP_DELETED_CELLS => 'true'
 //		descColFamily.setKeepDeletedCells(KeepDeletedCells.TRUE);
 //		descColFamily.setTimeToLive(HConstants.FOREVER);
-////		descColFamily.setMaxVersions(Integer.MAX_VALUE);
+//		descColFamily.setMaxVersions(Integer.MAX_VALUE);
 //		descColFamily.setMaxVersions(1);
 		desc.addFamily(descColFamily);
 		admin.createTable(desc);
@@ -136,13 +136,13 @@ public class HIndexConstantsAndUtils {
 		HColumnDescriptor descColFamily = new HColumnDescriptor(columnFamily);
 //		descColFamily.setKeepDeletedCells(KeepDeletedCells.TRUE);
 //		descColFamily.setTimeToLive(HConstants.FOREVER);
-		descColFamily.setMaxVersions(3);
+//		descColFamily.setMaxVersions(3);
 		desc.addFamily(descColFamily);
 		
 		HColumnDescriptor indexColFamily = new HColumnDescriptor(indexTableColumnFamily);
 //		indexColFamily.setKeepDeletedCells(KeepDeletedCells.TRUE);
 //		indexColFamily.setTimeToLive(HConstants.FOREVER);
-		indexColFamily.setMaxVersions(3);
+//		indexColFamily.setMaxVersions(3);
 		desc.addFamily(indexColFamily);
 		
 //		byte [] startKey = Bytes.toBytes(startKeyStr);

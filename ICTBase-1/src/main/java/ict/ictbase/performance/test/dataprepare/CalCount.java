@@ -15,10 +15,11 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 public class CalCount {
-	static String filePath = "/home/qhl/cluster/logs/result/global-async2/";
-	static String rFileName = filePath+"count.txt";
+	static String filePath = "/home/qhl/cluster/logs/result/";
+	static String consistenctMode = "local-async-insert";
+	static String rFileName = filePath+consistenctMode+"/count.txt";
 	
-	static String wFileName = filePath+"result.csv";
+	static String wFileName = filePath+consistenctMode+"/"+consistenctMode+"_result.csv";
 	
 	public static void main(String args[]){
 		File rfile = new File(rFileName);

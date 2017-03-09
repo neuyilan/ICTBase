@@ -121,17 +121,25 @@ public class GlobalMaterializeIndexByCompositeRowkey implements GlobalMaterializ
 
     public boolean deleteFromIndex(HTable indexTable, byte[] dataValue, byte[] dataKey) throws IOException {
         byte[] indexRowkey = IndexStorageFormat.generateIndexRowkey(dataKey, dataValue);
-        Get get = new Get(indexRowkey);
         
-        Result r = indexTable.get(get);
+//        Get get = new Get(indexRowkey);
+//        
+//        Result r = indexTable.get(get);
+//        
+//        if(r.isEmpty()){
+//        	return false;
+//        }else{
+//        	 Delete del = new Delete(indexRowkey);
+//             //del.setTimestamp(timestamp);
+//             indexTable.delete(del);
+//        }
+//        return true;
         
-        if(r.isEmpty()){
-        	return false;
-        }else{
-        	 Delete del = new Delete(indexRowkey);
-             //del.setTimestamp(timestamp);
-             indexTable.delete(del);
-        }
+        /***********************************time break down*******************************/
+        Delete del = new Delete(indexRowkey);
+        //del.setTimestamp(timestamp);
+        indexTable.delete(del);
+        /***********************************time break down*******************************/
         return true;
     }
 }

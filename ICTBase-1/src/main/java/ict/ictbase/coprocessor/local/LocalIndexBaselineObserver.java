@@ -36,23 +36,46 @@ public class LocalIndexBaselineObserver extends LocalIndexBasicObserver{
 		}
 		put.setAttribute("put_time_version", Bytes.toBytes(now));
 		/************************************************************/
-		if(put.getAttribute("index_put")==null){
-			System.out.println("a put: "
-					+ Bytes.toLong(put.getAttribute("put_time_version")));
-		}
+//		if(put.getAttribute("index_put")==null){
+//			System.out.println("a put: "
+//					+ Bytes.toLong(put.getAttribute("put_time_version")));
+//		}
 		/************************************************************/
+		
+		/**************for time break down test********************/
+//		if(put.getAttribute("index_put")==null){
+//			System.out.println("start put base table: "+System.nanoTime());
+//		}
+		
+		
+		/**************for time break down test********************/
     }
 	
 	public void postPut(final ObserverContext<RegionCoprocessorEnvironment> e,
 			final Put put, final WALEdit edit, final Durability durability)
 			throws IOException {
-		region = e.getEnvironment().getRegion();
-		regionInfo =  e.getEnvironment().getRegionInfo();
-		regionStartKey = Bytes.toString(regionInfo.getStartKey());
+//		region = e.getEnvironment().getRegion();
+//		regionInfo =  e.getEnvironment().getRegionInfo();
+//		regionStartKey = Bytes.toString(regionInfo.getStartKey());
 		
-//		synchronized(this){
+		/**************for time break down test********************/
+		
+		if(put.getAttribute("index_put")==null){
+			System.out.println("end put base table: "+System.nanoTime());
+			
+			region = e.getEnvironment().getRegion();
+			regionInfo =  e.getEnvironment().getRegionInfo();
+			regionStartKey = Bytes.toString(regionInfo.getStartKey());
+			
 			dataTableWithLocalIndexes.readBaseAndDeleteOld(put,regionStartKey,region);
 			dataTableWithLocalIndexes.insertNewToIndexes(put,regionStartKey,region);
+		}
+	   /**************for time break down test********************/
+		
+		
+//		synchronized(this){
+//			dataTableWithLocalIndexes.readBaseAndDeleteOld(put,regionStartKey,region);
+//			dataTableWithLocalIndexes.insertNewToIndexes(put,regionStartKey,region);
 //		}
 	}
 }

@@ -27,9 +27,11 @@ public class LocalHTableUpdateIndexByPut extends LocalHTableWithIndexesDriver {
 
 	public void insertNewToIndexes(Put put, String regionStartKey,Region region)
 			throws IOException {
-//		System.out.println("******start insert inedx ms:"+System.currentTimeMillis());
+		
+		
 		internalPrimitivePerPut(put, INSERT_INDEX, null, regionStartKey,region);
-//		System.out.println("******end insert inedx ms:"+System.currentTimeMillis());
+        
+		
 		
 //		if(put.getAttribute("index_put")==null){
 //			System.out.println("b put: "+Bytes.toLong(put.getAttribute("put_time_version")));
@@ -37,14 +39,18 @@ public class LocalHTableUpdateIndexByPut extends LocalHTableWithIndexesDriver {
 	}
 	
     public void readBaseAndDeleteOld(Put put,String regionStartKey,Region region) throws IOException {
-//    	System.out.println("******start read read ms:"+System.currentTimeMillis());
-        Result readBaseResult = internalPrimitivePerPut(put, READ_BASE, null,regionStartKey,region);
-//        System.out.println("******end  read read(start delete) ms:"+System.currentTimeMillis());
-        internalPrimitivePerPut(put, DELETE_INDEX, readBaseResult,regionStartKey,region);
-//        System.out.println("******end  delete read ms:"+System.currentTimeMillis());
-        if(put.getAttribute("index_put")==null){
-			System.out.println("b put: "+Bytes.toLong(put.getAttribute("put_time_version")));
-		}
+    		
+            Result readBaseResult = internalPrimitivePerPut(put, READ_BASE, null,regionStartKey,region);
+           
+            
+            
+            internalPrimitivePerPut(put, DELETE_INDEX, readBaseResult,regionStartKey,region);
+           
+            
+            
+//        if(put.getAttribute("index_put")==null){
+//			System.out.println("b put: "+Bytes.toLong(put.getAttribute("put_time_version")));
+//		}
     }
 
 	private Result internalPrimitivePerPut(Put put, int mode,
@@ -79,8 +85,12 @@ public class LocalHTableUpdateIndexByPut extends LocalHTableWithIndexesDriver {
 				if (dataValuePerColumn != null) {
 					if (mode == INSERT_INDEX) {
 						// put new to index
+						
+						System.out.println("start put index table: "+System.nanoTime());
 						putToIndex(regionStartKey,indexedColumnFamily, indexedColumnName,
 								dataValuePerColumn, dataKey,region);
+						System.out.println("end put index table: "+System.nanoTime());
+						
 					} else if (mode == READ_BASE) {
 						long maxTs = Bytes.toLong(put
 								.getAttribute("put_time_version"));
@@ -98,16 +108,19 @@ public class LocalHTableUpdateIndexByPut extends LocalHTableWithIndexesDriver {
                         	
                         	byte[] oldDataValuePerColumn  = CellUtil.cloneValue(cell);
                         	
-//                        	System.out.println("&&&&&&&&&&&&&&&&&&&& oldDataValuePerColumn \t,cell.getTimestamp()"+Bytes.toString(oldDataValuePerColumn)+","+cell.getTimestamp());
+//                        	System.out.println("&&&&&&&&&&&&&&&&&&&& oldDataValuePerColumn \t,cell.getTimestamp() "+Bytes.toString(oldDataValuePerColumn)+","+cell.getTimestamp());
                         	long ts = cell.getTimestamp();
+                        	
+                        	System.out.println("start delete index table: "+System.nanoTime());
                         	boolean isDelete = deleteFromIndex(regionStartKey,indexedColumnFamily, indexedColumnName,
                         			oldDataValuePerColumn, dataKey,region);
-                        	if(isDelete){
+                        	 System.out.println("end delete index table: "+System.nanoTime());
+//                        	if(isDelete){
 //                        		System.out.println("&&&&&&&&&&&&&&&&&&&& delete true");
-                        		deleteFromBaseTable(region,dataKey,ts);
-                        	}else{
+//                        		deleteFromBaseTable(region,dataKey,ts);
+//                        	}else{
 //                        		System.out.println("&&&&&&&&&&&&&&&&&&&& delete false");
-                        	}
+//                        	}
                             break;// only needs to remove the first value in index table
                         }
 					}
@@ -119,7 +132,9 @@ public class LocalHTableUpdateIndexByPut extends LocalHTableWithIndexesDriver {
 			}
 		}
 		if (mode == READ_BASE) {
+			System.out.println("start read base table: "+System.nanoTime());
 			Result readResultOld = region.get(get);
+			System.out.println("end read base table: "+System.nanoTime());
 			return readResultOld;
 		} else {
 			return null;

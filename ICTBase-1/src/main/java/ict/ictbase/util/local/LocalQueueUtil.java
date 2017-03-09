@@ -31,7 +31,6 @@ public class LocalQueueUtil{
 			tablePutsQueue = new LinkedBlockingQueue<Put>();
 			this.dataTableWithLocalIndexes=DTWithIndexes;
 //			System.out.println("********* initialized ==false");
-//			IEE = new IncrementingEnvironmentEdge();
 			call = new SyncRepairIndexCallable();
 			executor.submit(call);
 			this.startKey = startKey;
@@ -39,23 +38,28 @@ public class LocalQueueUtil{
 		}
 	}
 
-//	public long getNowTime(){
-//		return IEE.currentTime();
-//	}
 	
 	public void addTablePutQueueMap(Put put) {
 		tablePutsQueue.add(put);
-//		executor.submit(call);
 	}
 
 	
 	class SyncRepairIndexCallable implements Callable<Void> {
 
+		//local async_simple
+//		public Void call() throws Exception {
+//			while(true){
+//				tempPut = tablePutsQueue.take();
+//				dataTableWithLocalIndexes.readBaseAndDeleteOld(tempPut,startKey,region);
+//				dataTableWithLocalIndexes.insertNewToIndexes(tempPut,startKey,region);
+//			}
+//		}
+		
+		//local async_insert
 		public Void call() throws Exception {
 			while(true){
 				tempPut = tablePutsQueue.take();
 				dataTableWithLocalIndexes.readBaseAndDeleteOld(tempPut,startKey,region);
-//				dataTableWithLocalIndexes.insertNewToIndexes(tempPut,startKey,region);
 			}
 		}
 	}

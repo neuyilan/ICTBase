@@ -47,11 +47,20 @@ public class GlobalQueueUtil{
 	
 	class SyncRepairIndexCallable implements Callable<Void> {
 
+		// for gloabl async-insert
+//		public Void call() throws Exception {
+//			while(true){
+//				tempPut = tablePutsQueue.take();
+//				dataTableWithIndexes.readBaseAndDeleteOld(tempPut);
+//			}
+//		}
+		
+		// for gloabl async-simple
 		public Void call() throws Exception {
 			while(true){
 				tempPut = tablePutsQueue.take();
 				dataTableWithIndexes.readBaseAndDeleteOld(tempPut);
-				//dataTableWithIndexes.insertNewToIndexes(tempPut);
+				dataTableWithIndexes.insertNewToIndexes(tempPut);
 			}
 		}
 		

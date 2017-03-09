@@ -1,27 +1,5 @@
 package ict.ictbase.test.global;
 
-/*
- disable 'testtable2'
- drop 'testtable2'
- create 'testtable2', {NAME=>'cf', KEEP_DELETED_CELLS=>true}
- disable 'testtable2_cf_country'
- drop 'testtable2_cf_country'
- create 'testtable2_cf_country', "cf"
-
- disable 'testtable2'
- alter 'testtable2', METHOD => 'table_att', 'coprocessor' => 'hdfs://node1:8020/hbase_cp/libHbaseCoprocessor.jar|tthbase.coprocessor.PhysicalDeletionInCompaction|1001|arg1=1,arg2=2'
- alter 'testtable2', METHOD => 'table_att', 'secondaryIndex$1' => 'cf|country'
- enable 'testtable2'
-
- put 'testtable2', "key1", 'cf:country', "v1", 101
- flush 'testtable2' #hbase compaction ignores all data from memstore.
- put 'testtable2', "key1", 'cf:country', "v2", 102
- flush 'testtable2' #hbase compaction ignores all data from memstore.
- major_compact 'testtable2'
- get 'testtable2', 'key1', {COLUMN => 'cf:country', VERSIONS => 4} #1 version
- describe 'testtable2'
- */
-
 import ict.ictbase.commons.global.GlobalHTableGetByIndex;
 import ict.ictbase.util.HIndexConstantsAndUtils;
 
@@ -82,12 +60,12 @@ public class GlobalIssueCompaction {
 					Bytes.toBytes(testTableName));
 		}
 		
-//		HIndexConstantsAndUtils.createAndConfigBaseTable(conf, Bytes.toBytes(testTableName),
-//				Bytes.toBytes(columnFamily), new String[] { indexedColumnName });
+		HIndexConstantsAndUtils.createAndConfigBaseTable(conf, Bytes.toBytes(testTableName),
+				Bytes.toBytes(columnFamily), new String[] { indexedColumnName });
 		
-		HIndexConstantsAndUtils.createAndConfigAndSplitBaseTable(conf,
-				Bytes.toBytes(testTableName), Bytes.toBytes(columnFamily),Bytes.toBytes(INDEXTABLE_COLUMNFAMILY),
-				new String[] { indexedColumnName },startKeyStr,endKeyStr,numberOfRegions);
+//		HIndexConstantsAndUtils.createAndConfigAndSplitBaseTable(conf,
+//				Bytes.toBytes(testTableName), Bytes.toBytes(columnFamily),Bytes.toBytes(INDEXTABLE_COLUMNFAMILY),
+//				new String[] { indexedColumnName },startKeyStr,endKeyStr,numberOfRegions);
 		
 		byte[] indexTableName = HIndexConstantsAndUtils.generateIndexTableName(
 				Bytes.toBytes(testTableName), Bytes.toBytes(columnFamily),
@@ -102,7 +80,7 @@ public class GlobalIssueCompaction {
 		HIndexConstantsAndUtils.createAndConfigIndexTable(conf, indexTableName,
 				Bytes.toBytes(columnFamily));
 		
-		initIndexTableCoProcessors(conf,coprocessorJarLoc,indexTableName);
+//		initIndexTableCoProcessors(conf,coprocessorJarLoc,indexTableName);
 	}
 
 	static void loadData() throws IOException {

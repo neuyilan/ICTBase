@@ -102,9 +102,9 @@ public class LocalIssueCompaction {
 				coprocessorIndex++, true, coprocessorJarLoc,
 				"ict.ictbase.coprocessor.local.LocalIndexJusuPutObserver");
 
-		HIndexConstantsAndUtils.updateCoprocessor(conf, htable.getTableName(),
-				coprocessorIndex++, true, coprocessorJarLoc,
-				"ict.ictbase.coprocessor.local.LocalIndexScanObserver");
+//		HIndexConstantsAndUtils.updateCoprocessor(conf, htable.getTableName(),
+//				coprocessorIndex++, true, coprocessorJarLoc,
+//				"ict.ictbase.coprocessor.local.LocalIndexScanObserver");
 	}
 
 	public static void issueMajorCompactionAsynchronously() {

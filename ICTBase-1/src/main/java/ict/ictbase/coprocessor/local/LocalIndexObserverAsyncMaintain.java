@@ -21,7 +21,6 @@ public class LocalIndexObserverAsyncMaintain extends LocalIndexBasicObserver {
 			final Put put, final WALEdit edit, final Durability durability)
 			throws IOException {
 		super.prePut(e, put, edit, durability);
-//		long now = localQueueUtil.getNowTime();
 		long now = EnvironmentEdgeManager.currentTime();
 		byte[] byteNow = Bytes.toBytes(now);
 		Map<byte[], List<Cell>> familyMap = put.getFamilyCellMap();

@@ -17,6 +17,7 @@ import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.util.Bytes;
 
+// local async_simple
 public class LocalPutAsyncDelete {
 	private static String testTableName = "testtable";
 	private static String columnFamily = "cf";
@@ -54,9 +55,9 @@ public class LocalPutAsyncDelete {
 				coprocessorIndex++, true, coprocessorJarLoc,
 				"ict.ictbase.coprocessor.local.LocalIndexObserverAsyncMaintain");
 		
-		HIndexConstantsAndUtils.updateCoprocessor(conf, htable.getTableName(),
-				coprocessorIndex++, true, coprocessorJarLoc,
-				"ict.ictbase.coprocessor.local.LocalIndexScanObserver");
+//		HIndexConstantsAndUtils.updateCoprocessor(conf, htable.getTableName(),
+//				coprocessorIndex++, true, coprocessorJarLoc,
+//				"ict.ictbase.coprocessor.local.LocalIndexScanObserver");
 	}
 
 	public static void loadData() throws IOException {

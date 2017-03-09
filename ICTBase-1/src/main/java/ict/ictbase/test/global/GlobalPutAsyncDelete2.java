@@ -22,6 +22,8 @@ import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.util.Bytes;
 
+
+//global async-insert
 public class GlobalPutAsyncDelete2 {
 	private static String testTableName = "testtable";
 	private static String columnFamily = "cf";
@@ -72,7 +74,7 @@ public class GlobalPutAsyncDelete2 {
 		HIndexConstantsAndUtils.createAndConfigIndexTable(conf, indexTableName,
 				Bytes.toBytes(columnFamily));
 		
-		initIndexTableCoProcessors(conf,coprocessorJarLoc,indexTableName);
+//		initIndexTableCoProcessors(conf,coprocessorJarLoc,indexTableName);
 		
 	}
 
@@ -106,7 +108,7 @@ public class GlobalPutAsyncDelete2 {
 		// load data
 		String rowkeyStr = "sey_async";
 		byte[] rowKey = Bytes.toBytes(rowkeyStr);
-		for (int i = 0; i < 10; i++) {
+		for (int i = 0; i < 200; i++) {
 			Put p = new Put(rowKey);
 //			long value = i;
 			
@@ -118,7 +120,7 @@ public class GlobalPutAsyncDelete2 {
 			
 			p.addColumn(Bytes.toBytes(columnFamily),
 					Bytes.toBytes(indexedColumnName),
-					Bytes.toBytes("value"));
+					Bytes.toBytes("value"+i));
 			htable.put(p);
 		}
 	}
@@ -169,7 +171,7 @@ public class GlobalPutAsyncDelete2 {
 		htable = new GlobalHTableGetByIndex(conf, Bytes.toBytes(testTableName));
 		initCoProcessors(conf, coprocessorJarLoc, htable);
 
-		
+//		htable = new GlobalHTableGetByIndex(conf, Bytes.toBytes(testTableName));
 //		loadData();
 
 //		getTest();

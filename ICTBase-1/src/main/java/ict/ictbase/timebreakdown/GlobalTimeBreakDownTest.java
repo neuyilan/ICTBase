@@ -1,29 +1,21 @@
-package ict.ictbase.test.global;
-
+package ict.ictbase.timebreakdown;
 import ict.ictbase.commons.global.GlobalHTableGetByIndex;
 import ict.ictbase.util.HIndexConstantsAndUtils;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-import java.util.RandomAccess;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.hbase.Cell;
-import org.apache.hadoop.hbase.CellUtil;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.client.Admin;
 import org.apache.hadoop.hbase.client.Connection;
 import org.apache.hadoop.hbase.client.ConnectionFactory;
 import org.apache.hadoop.hbase.client.Put;
-import org.apache.hadoop.hbase.regionserver.Store;
 import org.apache.hadoop.hbase.util.Bytes;
-import org.apache.hadoop.hbase.util.Pair;
 
 
-public class GlobalPutSyncDelete {
-	private static String testTableName = "testtable";
+public class GlobalTimeBreakDownTest{
+	private static String testTableName = "timetesttable";
 	private static String columnFamily = "cf";
 	private static String indexedColumnName = "field0";
 	private static Configuration conf;
@@ -72,52 +64,23 @@ public class GlobalPutSyncDelete {
 	}
 
 	
-	public static void initIndexTableCoProcessors(Configuration conf,
-			String coprocessorJarLoc, byte[] htable) throws Exception {
-		int coprocessorIndex = 1;
-		HIndexConstantsAndUtils.updateCoprocessor(conf, htable,
-				coprocessorIndex++, true, coprocessorJarLoc,
-				"ict.ictbase.coprocessor.global.GlobalIndexScanObserver");
-	}
+//	public static void initIndexTableCoProcessors(Configuration conf,
+//			String coprocessorJarLoc, byte[] htable) throws Exception {
+//		int coprocessorIndex = 1;
+//		HIndexConstantsAndUtils.updateCoprocessor(conf, htable,
+//				coprocessorIndex++, true, coprocessorJarLoc,
+//				"ict.ictbase.coprocessor.global.GlobalIndexScanObserver");
+//	}
 	
 	
 	public static void loadData() throws IOException {
-		// load data
-		String rowkeyStr = "key_sync";
+		String rowkeyStr = "key_time";
 		byte[] rowKey = Bytes.toBytes(rowkeyStr);
-		for (int i = 0; i < 100; i++) {
+		for (int i = 0; i < 10000; i++) {
 			Put p = new Put(rowKey);
-			long value = i;
-//			long ts=System.currentTimeMillis();
-//			p.addColumn(Bytes.toBytes(columnFamily),
-//					Bytes.toBytes(indexedColumnName), ts,
-//					Bytes.toBytes("va" + value));
-//			p.setAttribute("put_time_version", Bytes.toBytes(ts));
-			
 			p.addColumn(Bytes.toBytes(columnFamily),
 					Bytes.toBytes(indexedColumnName),
-					Bytes.toBytes("va"+i));
-			
-			
-//			Map<byte[] , List<Cell>>  familyMap = p.getFamilyCellMap();
-//			System.out.println("((((((((((((");
-//			for (Map.Entry<byte[], List<Cell>> e : familyMap.entrySet()) {
-//			      byte[] family = e.getKey();
-//			      System.out.println("****************: "+Bytes.toString(family));
-//			      List<Cell> cells = e.getValue();
-//			      int listSize = cells.size();
-//			      Cell cell = cells.get(0);
-//			        Cell cell1 = cells.get(1);
-//			        System.out.println(cell.equals(cell1));
-//			      for (int j=0; j < listSize; j++) {
-//			    	  cell = cells.get(j);
-//			        
-//			        
-//			        System.out.println(Bytes.toString(CellUtil.cloneQualifier(cell))+","+Bytes.toString(CellUtil.cloneValue(cell)));
-//			      }
-//			 }
-			
-			
+					Bytes.toBytes("value"));
 			htable.put(p);
 		}
 
@@ -130,6 +93,7 @@ public class GlobalPutSyncDelete {
 		byte[] rowKey = null;
 		for (int i = 0; i < 10000; i++) {
 			rowKey = Bytes.toBytes(tmpStr+i);
+			System.out.println("start rpc: "+System.nanoTime());
 			Put p = new Put(rowKey);
 			long value = 100+i;
 			p.addColumn(Bytes.toBytes(columnFamily),
@@ -148,20 +112,13 @@ public class GlobalPutSyncDelete {
 			indexedColumnName = args[2];
 
 		}
+		
 		initTables(conf, testTableName, columnFamily, indexedColumnName);
 		htable = new GlobalHTableGetByIndex(conf, Bytes.toBytes(testTableName));
 		initCoProcessors(conf, coprocessorJarLoc, htable);
 
-//		htable = new GlobalHTableGetByIndex(conf, Bytes.toBytes(testTableName));
-//		loadData();
+		htable = new GlobalHTableGetByIndex(conf, Bytes.toBytes(testTableName));
+		loadData();
 		
-//		loadData2DiffKey();
-
-		// getByIndex
-//		htable.configPolicy(GlobalHTableGetByIndex.PLY_FASTREAD);
-//		List<byte[]> res = htable.getByIndex(Bytes.toBytes(columnFamily),
-//				Bytes.toBytes(indexedColumnName), Bytes.toBytes("v4"));
-//		assert (res != null && res.size() != 0);
-//		System.out.println("Result is " + Bytes.toString(res.get(0)));
 	}
 }

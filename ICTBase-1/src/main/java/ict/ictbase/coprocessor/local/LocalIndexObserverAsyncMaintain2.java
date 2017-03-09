@@ -18,16 +18,15 @@ import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.hadoop.hbase.util.EnvironmentEdgeManager;
 
 public class LocalIndexObserverAsyncMaintain2 extends LocalIndexBasicObserver {
-	Region region ;//= e.getEnvironment().getRegion();
-	HRegionInfo regionInfo ;//=  e.getEnvironment().getRegionInfo();
-	String regionStartKey ;//= Bytes.toString(regionInfo.getStartKey());
+	private Region region ;//= e.getEnvironment().getRegion();
+	private HRegionInfo regionInfo ;//=  e.getEnvironment().getRegionInfo();
+	private String regionStartKey ;//= Bytes.toString(regionInfo.getStartKey());
 	
 	@Override
 	public void prePut(final ObserverContext<RegionCoprocessorEnvironment> e,
 			final Put put, final WALEdit edit, final Durability durability)
 			throws IOException {
 		super.prePut(e, put, edit, durability);
-//		long now = localQueueUtil.getNowTime();
 		long now = EnvironmentEdgeManager.currentTime();
 		byte[] byteNow = Bytes.toBytes(now);
 		Map<byte[], List<Cell>> familyMap = put.getFamilyCellMap();

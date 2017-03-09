@@ -20,7 +20,6 @@ import org.apache.hadoop.hbase.coprocessor.ObserverContext;
 import org.apache.hadoop.hbase.coprocessor.RegionCoprocessorEnvironment;
 import org.apache.hadoop.hbase.regionserver.InternalScanner;
 import org.apache.hadoop.hbase.regionserver.RegionScanner;
-import org.apache.hadoop.hbase.regionserver.StoreScanner;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.hadoop.hbase.util.EnvironmentEdgeManager;
 
@@ -56,14 +55,9 @@ public class GlobalIndexScanObserver extends BaseRegionObserver {
 	public RegionScanner preScannerOpen(
 			final ObserverContext<RegionCoprocessorEnvironment> e,
 			final Scan scan, final RegionScanner s) throws IOException {
-		// IncrementingEnvironmentEdge IEE = new IncrementingEnvironmentEdge();
-		// long now = IEE.currentTime();
 		long now = EnvironmentEdgeManager.currentTime();
 		byte[] byteNow = Bytes.toBytes(now);
 		scan.setAttribute("scan_time_version", byteNow);
-		// e.getEnvironment().getConfiguration()
-		// .set("scan_time_version", String.valueOf(now));
-
 
 		System.out.println("a scan: "
 				+ Bytes.toLong(scan.getAttribute("scan_time_version")));
@@ -83,8 +77,6 @@ public class GlobalIndexScanObserver extends BaseRegionObserver {
 			final ObserverContext<RegionCoprocessorEnvironment> e,
 			final InternalScanner s, final List<Result> results,
 			final int limit, final boolean hasMore) throws IOException {
-		// long attributeValue = Long.valueOf(e.getEnvironment()
-		// .getConfiguration().get("scan_time_version"));
 
 		long attributeValue = Bytes.toLong(s.getScan().getAttribute(
 				"scan_time_version"));

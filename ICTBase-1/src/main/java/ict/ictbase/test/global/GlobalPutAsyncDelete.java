@@ -22,6 +22,7 @@ import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.util.Bytes;
 
+//gloabl async_simple
 public class GlobalPutAsyncDelete {
 	private static String testTableName = "testtable";
 	private static String columnFamily = "cf";
@@ -72,7 +73,7 @@ public class GlobalPutAsyncDelete {
 		HIndexConstantsAndUtils.createAndConfigIndexTable(conf, indexTableName,
 				Bytes.toBytes(columnFamily));
 		
-		initIndexTableCoProcessors(conf,coprocessorJarLoc,indexTableName);
+//		initIndexTableCoProcessors(conf,coprocessorJarLoc,indexTableName);
 		
 	}
 

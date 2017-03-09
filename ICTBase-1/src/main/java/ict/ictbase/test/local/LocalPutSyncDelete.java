@@ -63,9 +63,9 @@ public class LocalPutSyncDelete {
 				coprocessorIndex++, true, coprocessorJarLoc,
 				"ict.ictbase.coprocessor.local.LocalIndexBaselineObserver");
 		
-		HIndexConstantsAndUtils.updateCoprocessor(conf, htable.getTableName(),
-				coprocessorIndex++, true, coprocessorJarLoc,
-				"ict.ictbase.coprocessor.local.LocalIndexScanObserver");
+//		HIndexConstantsAndUtils.updateCoprocessor(conf, htable.getTableName(),
+//				coprocessorIndex++, true, coprocessorJarLoc,
+//				"ict.ictbase.coprocessor.local.LocalIndexScanObserver");
 	}
 
 	public static void loadData() throws IOException {
@@ -88,7 +88,7 @@ public class LocalPutSyncDelete {
 	public static void loadData2() throws IOException {
 		String rowStr = "aaa";
 		byte[] rowKey;
-		for (int i = 0; i < 10000; i++) {
+		for (int i = 0; i < 1000; i++) {
 			rowKey = Bytes.toBytes(rowStr);
 			Put p = new Put(rowKey);
 			p.addColumn(Bytes.toBytes(columnFamily),
@@ -179,6 +179,8 @@ public class LocalPutSyncDelete {
 		initTables(conf, testTableName, columnFamily, indexedColumnName,startKeyStr,endKeyStr,numberOfRegions);
 		htable = new LocalHTableGetByIndex(conf, Bytes.toBytes(testTableName));
 		initCoProcessors(conf, coprocessorJarLoc, htable);
+		
+//		htable = new LocalHTableGetByIndex(conf, Bytes.toBytes(testTableName));
 //		loadData2();
 		
 //		loadAndDeleteData();

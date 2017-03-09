@@ -23,27 +23,37 @@ public class GlobalIndexObserverBaseline extends GlobalIndexBasicObserver {
 			throws IOException {
 		super.prePut(e, put, edit, durability);
 //		long now = queueUtil.getNowTime();
-//		long now = EnvironmentEdgeManager.currentTime();
-//		byte[] byteNow = Bytes.toBytes(now);
-//		Map<byte[], List<Cell>> familyMap = put.getFamilyCellMap();
-//		for (Entry<byte[], List<Cell>> entry : familyMap.entrySet()) {
-//			List<Cell> cells = entry.getValue();
-//			for (Cell cell : cells) {
-//				CellUtil.updateLatestStamp(cell, byteNow, 0);
-//			}
-//		}
-//		put.setAttribute("put_time_version", Bytes.toBytes(now));
+		long now = EnvironmentEdgeManager.currentTime();
+		byte[] byteNow = Bytes.toBytes(now);
+		Map<byte[], List<Cell>> familyMap = put.getFamilyCellMap();
+		for (Entry<byte[], List<Cell>> entry : familyMap.entrySet()) {
+			List<Cell> cells = entry.getValue();
+			for (Cell cell : cells) {
+				CellUtil.updateLatestStamp(cell, byteNow, 0);
+			}
+		}
+		put.setAttribute("put_time_version", Bytes.toBytes(now));
 //		/************************************************************/
 //		System.out.println("a put: "+Bytes.toLong(put.getAttribute("put_time_version")));
 //		/************************************************************/
+		
+//		/**************for time break down test********************/
+//		System.out.println("start put base table: "+System.nanoTime());
+//		/**************for time break down test********************/
+		
+		
 	}
 	
 	public void postPut(final ObserverContext<RegionCoprocessorEnvironment> e,
 			final Put put, final WALEdit edit, final Durability durability)
 			throws IOException {
 //		synchronized(this){
-//			dataTableWithIndexes.readBaseAndDeleteOld(put);
-//			dataTableWithIndexes.insertNewToIndexes(put);
+		/**************for time break down test********************/
+			System.out.println("end put base table: "+System.nanoTime());
+		/**************for time break down test********************/
+			
+			dataTableWithIndexes.readBaseAndDeleteOld(put);
+			dataTableWithIndexes.insertNewToIndexes(put);
 //		}
 	}
 	

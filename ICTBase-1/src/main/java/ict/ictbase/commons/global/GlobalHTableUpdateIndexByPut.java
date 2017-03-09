@@ -51,7 +51,10 @@ public class GlobalHTableUpdateIndexByPut extends GlobalHTableWithIndexesDriver 
                 if(dataValuePerColumn != null){
                     if(mode == INSERT_INDEX){
                         //put new to index
+                    	System.out.println("start put index table: "+System.nanoTime());
                         putToIndex(indexedColumnFamily, indexedColumnName, dataValuePerColumn, dataKey);
+                        System.out.println("end put index table: "+System.nanoTime());
+                        
                     } else if (mode == READ_BASE) {
                         //read base 
                         //TOREMOVE need specify timestamp to guarantee get old values.
@@ -70,14 +73,17 @@ public class GlobalHTableUpdateIndexByPut extends GlobalHTableWithIndexesDriver 
                         	byte[] oldDataValuePerColumn  = CellUtil.cloneValue(cell);
 //                        	System.out.println("&&&&&&&&&&&&&&&&&&&& oldDataValuePerColumn \t+"+Bytes.toString(oldDataValuePerColumn));
                         	long ts = cell.getTimestamp();
+                        	 System.out.println("start delete index table: "+System.nanoTime());
                         	boolean isDelete = deleteFromIndex(indexedColumnFamily, indexedColumnName, oldDataValuePerColumn, dataKey);
-                        	if(isDelete){
-//                        		System.out.println("&&&&&&&&&&&&&&&&&&&& delete true");
-                        		deleteFromBaseTable(dataKey,ts);
-                        	}else{
-//                        		System.out.println("&&&&&&&&&&&&&&&&&&&& delete false");
-                        	}
-                           // break;// only needs to remove the first value in index table
+                        	 System.out.println("end delete index table: "+System.nanoTime());
+                        	
+//                        	if(isDelete){
+////                        		System.out.println("&&&&&&&&&&&&&&&&&&&& delete true");
+//                        		deleteFromBaseTable(dataKey,ts);
+//                        	}else{
+////                        		System.out.println("&&&&&&&&&&&&&&&&&&&& delete false");
+//                        	}
+                            break;// only needs to remove the first value in index table
                         }
                         
                     }
@@ -88,7 +94,9 @@ public class GlobalHTableUpdateIndexByPut extends GlobalHTableWithIndexesDriver 
             }
         }
         if (mode == READ_BASE) {
+//        	System.out.println("start read base table: "+System.nanoTime());
              Result readResultOld = this.get(get);
+//             System.out.println("end read base table: "+System.nanoTime());
              return readResultOld;
         } else {
              return null;
@@ -96,13 +104,20 @@ public class GlobalHTableUpdateIndexByPut extends GlobalHTableWithIndexesDriver 
     }
 
     public void insertNewToIndexes(Put put) throws IOException {
+    	
         internalPrimitivePerPut(put, INSERT_INDEX, null);
-        System.out.println("b put: "+Bytes.toLong(put.getAttribute("put_time_version")));
+        
+//        System.out.println("b put: "+Bytes.toLong(put.getAttribute("put_time_version")));
     }
 
     public void readBaseAndDeleteOld(Put put) throws IOException {
+    	System.out.println("start read base table: "+System.nanoTime());
         Result readBaseResult = internalPrimitivePerPut(put, READ_BASE, null);
+        System.out.println("end read base table: "+System.nanoTime());
+       
+        
         internalPrimitivePerPut(put, DELETE_INDEX, readBaseResult);
+       
 //        System.out.println("b put: "+Bytes.toLong(put.getAttribute("put_time_version")));
     }
 
